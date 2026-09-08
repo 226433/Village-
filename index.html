@@ -1,3531 +1,4662 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>One Minute News</title>
+<title>MILLIONPIXEL — Digital Business Wall & News</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-
-<script>
-tailwind.config = {
-    darkMode: "class"
-};
-</script>
-
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
 
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:Arial,Helvetica,sans-serif;
-    background:#000;
-    color:#fff;
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#f5f7fb;
+  color:#111827;
+  overflow-x:hidden;
 }
 
-button{
-    -webkit-tap-highlight-color:transparent;
+body.dark{background:#070b14;color:#f8fafc}
+
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+img,video{max-width:100%}
+
+:root{
+  --primary:#2563eb;
+  --primary2:#7c3aed;
+  --danger:#ef4444;
+  --green:#16a34a;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --soft:#f3f4f6;
 }
 
-.app{
-    width:100%;
-    height:100vh;
-    position:relative;
-    background:#050505;
+body.dark{
+  --card:#111827;
+  --text:#f8fafc;
+  --muted:#9ca3af;
+  --border:#263244;
+  --soft:#182233;
 }
 
-@media(min-width:700px){
-    .app{
-        width:480px;
-        margin:auto;
-        box-shadow:0 0 70px rgba(0,0,0,.7);
-    }
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  height:64px;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
 }
 
-/* ================= HEADER ================= */
+.dark .topbar{background:rgba(7,11,20,.92)}
 
-.header{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    z-index:50;
-    padding:12px 13px 9px;
-    background:linear-gradient(
-        to bottom,
-        rgba(0,0,0,.98),
-        rgba(0,0,0,.88),
-        rgba(0,0,0,.25),
-        transparent
-    );
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
 }
 
-.logo{
-    font-size:17px;
-    font-weight:1000;
-    letter-spacing:-.5px;
+.logo-mark{
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  background:linear-gradient(135deg,#2563eb,#7c3aed,#ec4899);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:20px;
+  font-weight:900;
+  box-shadow:0 8px 25px rgba(37,99,235,.25);
 }
 
-.logo span{
-    color:#ef4444;
+.brand-title{
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:-.5px;
 }
 
-.live{
-    background:#dc2626;
-    color:#fff;
-    padding:4px 7px;
-    border-radius:5px;
-    font-size:8px;
-    font-weight:900;
+.brand-sub{
+  font-size:9px;
+  color:var(--muted);
+  font-weight:700;
 }
 
-.mode-switch{
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:999px;
-    padding:5px 9px;
-    display:flex;
-    gap:7px;
-    font-size:10px;
-    font-weight:800;
+.top-actions{display:flex;gap:8px}
+
+.icon-btn{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  background:var(--soft);
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
 }
 
-.mode-active{
-    color:#ef4444;
+.main-nav{
+  position:sticky;
+  top:64px;
+  z-index:900;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  overflow-x:auto;
+  scrollbar-width:none;
 }
 
-.mode-inactive{
-    color:#888;
+.main-nav::-webkit-scrollbar{display:none}
+
+.nav-btn{
+  flex:1;
+  min-width:110px;
+  padding:14px 10px;
+  background:transparent;
+  color:var(--muted);
+  font-weight:800;
+  font-size:13px;
+  border-bottom:3px solid transparent;
+}
+
+.nav-btn.active{
+  color:var(--primary);
+  border-bottom-color:var(--primary);
+}
+
+.one-minute-news-heading{
+  margin:18px 0 12px;
+  text-align:center;
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+@media(max-width:600px){
+  .one-minute-news-heading{font-size:22px;margin:14px 0 10px}
+}
+
+.screen{
+  display:none;
+  min-height:calc(100vh - 110px);
+}
+
+.screen.active{display:block}
+
+.container{
+  width:min(1200px,100%);
+  margin:auto;
+  padding:16px;
 }
 
 .breaking{
-    margin-top:9px;
-    height:31px;
-    border-radius:9px;
-    background:rgba(127,29,29,.32);
-    border:1px solid rgba(239,68,68,.25);
-    display:flex;
-    align-items:center;
-    gap:7px;
-    padding:0 9px;
+  background:#111827;
+  color:white;
+  padding:8px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+  overflow:hidden;
 }
 
-.breaking-dot{
-    width:7px;
-    height:7px;
-    background:#ef4444;
-    border-radius:50%;
-    animation:pulse 1s infinite;
+.breaking-badge{
+  background:#ef4444;
+  padding:4px 8px;
+  border-radius:6px;
+  font-weight:900;
+  flex-shrink:0;
 }
 
-@keyframes pulse{
-    0%,100%{opacity:1}
-    50%{opacity:.3}
+.breaking-text{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
+
+.search-box{
+  display:flex;
+  gap:8px;
+  margin-bottom:14px;
+}
+
+.search-box input{
+  flex:1;
+  height:46px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  border-radius:14px;
+  padding:0 15px;
+  outline:none;
+}
+
+.search-box input:focus{border-color:var(--primary)}
 
 .categories{
-    display:flex;
-    gap:7px;
-    overflow-x:auto;
-    margin-top:8px;
-    scrollbar-width:none;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:10px;
+  scrollbar-width:none;
 }
 
-.categories::-webkit-scrollbar{
-    display:none;
-}
+.categories::-webkit-scrollbar{display:none}
 
 .category{
-    flex:none;
-    border-radius:999px;
-    padding:6px 11px;
-    background:#181818;
-    border:1px solid #292929;
-    color:#999;
-    font-size:9px;
-    font-weight:800;
+  white-space:nowrap;
+  padding:9px 14px;
+  border-radius:999px;
+  background:var(--soft);
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
 }
 
 .category.active{
-    background:#dc2626;
-    border-color:#dc2626;
-    color:#fff;
+  background:var(--primary);
+  color:#fff;
 }
 
-/* ================= NEWS SCREEN ================= */
-
-.news-screen{
-    height:100vh;
-    overflow-y:auto;
-    padding-top:143px;
-    padding-bottom:82px;
-    scrollbar-width:none;
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:14px 0;
 }
 
-.news-screen::-webkit-scrollbar{
-    display:none;
+.section-title h2{font-size:20px}
+.section-title span{color:var(--muted);font-size:12px}
+
+.news-grid{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
 }
 
-.news-heading{
-    padding:0 13px 10px;
-}
-
-.news-heading h1{
-    font-size:20px;
-    font-weight:1000;
-    margin:0;
-}
-
-.news-heading p{
-    color:#777;
-    font-size:9px;
-    margin:4px 0 0;
-}
-
-/* ================= NEWS CARD ================= */
-
+/* WAY2NEWS-STYLE SCROLL FEED */
 .news-card{
-    margin:0 12px 14px;
-    border-radius:17px;
-    overflow:hidden;
-    background:#111;
-    border:1px solid #222;
-    box-shadow:0 5px 25px rgba(0,0,0,.35);
+  display:grid;
+  grid-template-columns:260px 1fr;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 6px 22px rgba(0,0,0,.05);
 }
 
-.news-photo-wrap{
-    position:relative;
+.news-image{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  background:var(--soft);
 }
 
-.news-photo{
-    width:100%;
-    height:205px;
-    display:block;
-    object-fit:cover;
-    background:#222;
+@media(max-width:600px){
+  .news-grid{
+    gap:12px;
+  }
+
+  .news-card{
+    grid-template-columns:1fr;
+    border-radius:14px;
+  }
+
+  .news-image{
+    height:210px;
+  }
+}
+
+.news-content{padding:14px}
+
+.news-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:9px;
 }
 
 .news-tag{
-    position:absolute;
-    left:10px;
-    top:10px;
-    background:#dc2626;
-    padding:5px 8px;
-    border-radius:6px;
-    font-size:8px;
-    font-weight:900;
+  font-size:10px;
+  background:#dbeafe;
+  color:#1d4ed8;
+  padding:5px 8px;
+  border-radius:999px;
+  font-weight:900;
 }
 
-.news-read{
-    position:absolute;
-    right:10px;
-    top:10px;
-    width:37px;
-    height:37px;
-    border-radius:50%;
-    background:rgba(0,0,0,.75);
-    border:1px solid rgba(255,255,255,.2);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:16px;
-}
-
-.news-body{
-    padding:13px;
+.dark .news-tag{
+  background:#172554;
+  color:#93c5fd;
 }
 
 .news-title{
-    font-size:18px;
-    line-height:1.25;
-    font-weight:950;
-    margin:0;
+  font-size:17px;
+  line-height:1.3;
+  font-weight:900;
+  margin-bottom:8px;
 }
 
-.news-description{
-    color:#a1a1aa;
-    font-size:12px;
-    line-height:1.5;
-    margin:8px 0 0;
-}
-
-.news-meta{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    color:#777;
-    font-size:9px;
-    margin-top:10px;
-}
-
-.news-source{
-    margin-top:10px;
-    display:flex;
-    align-items:center;
-    gap:7px;
-}
-
-.source-logo{
-    width:27px;
-    height:27px;
-    border-radius:50%;
-    background:#dc2626;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:8px;
-    font-weight:1000;
-}
-
-.source-name{
-    font-size:9px;
-    font-weight:800;
-    color:#999;
+.news-desc{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+  margin-bottom:12px;
 }
 
 .news-actions{
-    border-top:1px solid #222;
-    margin-top:11px;
-    padding-top:9px;
-    display:flex;
-    justify-content:space-between;
+  display:flex;
+  gap:5px;
+  margin-top:12px;
 }
 
-.news-action{
-    color:#999;
-    font-size:10px;
-    display:flex;
-    align-items:center;
-    gap:3px;
+.action{
+  flex:1;
+  background:var(--soft);
+  color:var(--text);
+  border-radius:10px;
+  padding:9px 5px;
+  font-size:11px;
+  font-weight:800;
 }
 
-.news-action:active{
-    transform:scale(.92);
+.action.liked{color:#ef4444}
+
+.reels-strip{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  scrollbar-width:none;
 }
 
-.liked{
-    color:#ef4444;
+.reels-strip::-webkit-scrollbar{display:none}
+
+.reel-mini{
+  min-width:150px;
+  height:220px;
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+  background:#000;
+  cursor:pointer;
 }
 
-/* ================= TRENDING ================= */
-
-.trending{
-    padding:0 12px 17px;
+.reel-mini video,
+.reel-mini img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-.trending-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:9px;
-}
-
-.trending-title{
-    font-size:16px;
-    font-weight:1000;
-}
-
-.trending-sub{
-    font-size:9px;
-    color:#777;
+.reel-mini-overlay{
+  position:absolute;
+  inset:auto 8px 8px;
+  color:white;
+  font-size:12px;
+  font-weight:800;
+  text-shadow:0 2px 6px #000;
 }
 
 .trending-list{
-    display:flex;
-    overflow-x:auto;
-    gap:9px;
-    scrollbar-width:none;
+  display:grid;
+  gap:9px;
 }
 
-.trending-list::-webkit-scrollbar{
-    display:none;
+.trending-item{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:12px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  cursor:pointer;
 }
 
-.trend-card{
-    min-width:240px;
-    background:#151515;
-    border:1px solid #292929;
-    border-radius:14px;
-    padding:11px;
+.rank{
+  width:32px;
+  height:32px;
+  border-radius:10px;
+  background:var(--soft);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  color:var(--primary);
 }
 
-.trend-number{
-    width:26px;
-    height:26px;
-    border-radius:50%;
-    background:#dc2626;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:10px;
-    font-weight:1000;
+.trending-title{
+  font-size:13px;
+  font-weight:800;
 }
 
-.trend-text{
-    margin-top:8px;
-    font-size:12px;
-    line-height:1.35;
-    font-weight:850;
+.reels-screen{
+  padding:0;
+  background:#000;
 }
 
-.trend-time{
-    color:#666;
-    font-size:8px;
-    margin-top:7px;
+.reels-feed{
+  height:calc(100vh - 110px);
+  overflow-y:auto;
+  scroll-snap-type:y mandatory;
+  background:#000;
 }
 
-/* ================= VIDEO REELS ================= */
-
-.video-screen{
-    height:100vh;
-    overflow-y:auto;
-    scroll-snap-type:y mandatory;
-    scrollbar-width:none;
+.reel-slide{
+  height:calc(100vh - 110px);
+  position:relative;
+  scroll-snap-align:start;
+  background:#000;
+  overflow:hidden;
 }
 
-.video-screen::-webkit-scrollbar{
-    display:none;
+.reel-video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-.video-page{
-    height:100vh;
-    min-height:100vh;
-    scroll-snap-align:start;
-    position:relative;
-    overflow:hidden;
-    background:#000;
+.reel-gradient{
+  position:absolute;
+  inset:40% 0 0;
+  background:linear-gradient(transparent,rgba(0,0,0,.9));
+  pointer-events:none;
 }
 
-.video{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    background:#000;
+.reel-info{
+  position:absolute;
+  left:16px;
+  bottom:25px;
+  right:90px;
+  color:white;
+  z-index:2;
 }
 
-.video-gradient{
-    position:absolute;
-    inset:0;
-    background:
-        linear-gradient(
-            to bottom,
-            rgba(0,0,0,.65),
-            transparent 30%,
-            transparent 48%,
-            rgba(0,0,0,.92)
-        );
-    pointer-events:none;
+.reel-info h3{
+  font-size:18px;
+  margin-bottom:7px;
 }
 
-.video-info{
-    position:absolute;
-    left:13px;
-    right:70px;
-    bottom:90px;
-    z-index:5;
+.reel-info p{
+  font-size:12px;
+  line-height:1.5;
+  opacity:.9;
 }
 
-.video-tag{
-    display:inline-block;
-    background:#dc2626;
-    padding:5px 8px;
-    border-radius:5px;
-    font-size:8px;
-    font-weight:900;
-    margin-bottom:8px;
+.reel-actions{
+  position:absolute;
+  right:12px;
+  bottom:25px;
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  z-index:4;
 }
 
-.video-title{
-    font-size:20px;
-    line-height:1.2;
-    font-weight:1000;
+.reel-action{
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+  background:transparent;
+  font-size:11px;
+  font-weight:800;
+  text-shadow:0 2px 5px #000;
 }
 
-.video-description{
-    color:#ddd;
-    font-size:11px;
-    line-height:1.45;
-    margin-top:7px;
+.reel-action span:first-child{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
 }
 
-.video-side{
-    position:absolute;
-    right:9px;
-    bottom:88px;
-    z-index:10;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:13px;
+.reel-action.liked span:first-child{color:#ff3158}
+
+.business-head{
+  background:
+    radial-gradient(circle at 20% 20%,rgba(37,99,235,.3),transparent 30%),
+    radial-gradient(circle at 80% 20%,rgba(124,58,237,.3),transparent 30%),
+    #0b1020;
+  color:white;
+  border-radius:24px;
+  padding:16px;
+  margin-bottom:15px;
+  overflow:hidden;
 }
 
-.video-button{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    color:#fff;
-    font-size:8px;
-    font-weight:800;
+.business-head h1,
+.business-head p,
+.business-head .business-status{
+  display:none !important;
 }
 
-.video-circle{
-    width:43px;
-    height:43px;
-    border-radius:50%;
-    background:rgba(0,0,0,.62);
-    border:1px solid rgba(255,255,255,.16);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:17px;
-    margin-bottom:3px;
+.business-head .business-timer{
+  display:block !important;
+  margin-top:0;
 }
 
-.video-progress{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:71px;
-    height:2px;
-    background:rgba(255,255,255,.2);
-    z-index:20;
+.business-controls{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  margin-bottom:12px;
+  scrollbar-width:none;
 }
 
-.video-progress-bar{
-    height:100%;
-    width:0;
-    background:#fff;
+.business-controls::-webkit-scrollbar{display:none}
+
+.wall-btn{
+  white-space:nowrap;
+  padding:10px 18px;
+  border-radius:12px;
+  background:var(--soft);
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+  transition:.2s;
 }
 
-/* ================= BOTTOM NAV ================= */
-
-.bottom-nav{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    z-index:60;
-    height:68px;
-    background:rgba(0,0,0,.94);
-    backdrop-filter:blur(18px);
-    border-top:1px solid #222;
-    display:flex;
-    align-items:center;
-    justify-content:space-around;
+.wall-btn.active{
+  background:var(--primary);
+  color:#fff;
+  box-shadow:0 4px 15px rgba(37,99,235,.3);
 }
 
-.nav-button{
-    color:#777;
-    font-size:8px;
-    font-weight:800;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:3px;
+.business-filters{
+  display:grid !important;
+  grid-template-columns:1.5fr 1fr 1fr;
+  gap:10px;
+  margin-bottom:15px;
 }
 
-.nav-button span{
-    font-size:19px;
+.business-filters input,
+.business-filters select{
+  width:100%;
+  height:46px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  padding:0 13px;
+  outline:none;
+  font-size:12px;
+  font-weight:700;
+  transition:.2s;
 }
 
-.nav-button.active{
-    color:#ef4444;
+.business-filters input::placeholder{color:var(--muted)}
+
+.business-filters input:focus,
+.business-filters select:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(37,99,235,.10);
 }
 
-/* ================= MODALS ================= */
+.business-filters option{
+  background:var(--card);
+  color:var(--text);
+}
+
+.business-page-info{
+  display:none !important;
+}
+
+.business-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:12px;
+}
+
+.business-tile{
+  min-height:220px;
+  position:relative;
+  border-radius:18px;
+  overflow:hidden;
+  background:#111827;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.1);
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  -webkit-tap-highlight-color:transparent;
+  box-shadow:0 8px 20px rgba(0,0,0,.15);
+}
+
+.business-tile:hover{
+  transform:translateY(-5px) scale(1.02);
+  border-color:var(--primary);
+  box-shadow:0 12px 30px rgba(37,99,235,.25);
+}
+
+.business-ad{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  background:#0b1020;
+}
+
+.business-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to bottom,
+    rgba(0,0,0,.1),
+    rgba(0,0,0,.4) 50%,
+    rgba(0,0,0,.9)
+  );
+  pointer-events:none;
+}
+
+.business-logo{
+  position:absolute;
+  top:10px;
+  left:10px;
+  width:50px;
+  height:50px;
+  border-radius:12px;
+  object-fit:cover;
+  background:white;
+  padding:3px;
+  z-index:3;
+  box-shadow:0 4px 15px rgba(0,0,0,.4);
+  border:2px solid rgba(255,255,255,.8);
+}
+
+.business-info{
+  position:absolute;
+  left:10px;
+  right:10px;
+  bottom:10px;
+  color:white;
+  z-index:4;
+}
+
+.business-name{
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-shadow:0 2px 4px rgba(0,0,0,.8);
+}
+
+.business-location{
+  font-size:9px;
+  opacity:.85;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.logo-wall{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:12px;
+}
+
+.logo-wall-card{
+  aspect-ratio:1;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+  cursor:pointer;
+  overflow:hidden;
+  transition:all .25s ease;
+  box-shadow:0 4px 15px rgba(0,0,0,.04);
+}
+
+.logo-wall-card:hover{
+  transform:scale(1.05);
+  border-color:var(--primary);
+  box-shadow:0 8px 25px rgba(37,99,235,.2);
+}
+
+.logo-wall-card img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.ad-wall{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:12px;
+}
+
+.ad-wall-card{
+  aspect-ratio:1;
+  border-radius:18px;
+  overflow:hidden;
+  background:#111827;
+  cursor:pointer;
+  position:relative;
+  transition:all .25s ease;
+}
+
+.ad-wall-card:hover{
+  transform:scale(1.04);
+  box-shadow:0 8px 25px rgba(0,0,0,.4);
+}
+
+.ad-wall-card img,
+.ad-wall-card video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.ad-wall-tag{
+  position:absolute;
+  bottom:8px;
+  left:8px;
+  right:8px;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(4px);
+  color:white;
+  font-size:10px;
+  font-weight:800;
+  padding:4px 8px;
+  border-radius:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.business-timer{
+  height:4px;
+  background:rgba(255,255,255,.12);
+  border-radius:99px;
+  overflow:hidden;
+  margin-top:10px;
+}
+
+.business-timer-fill{
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);
+  transform-origin:left;
+  transform:scaleX(1);
+}
+
+.ad-tv-modal{
+  position:fixed;
+  inset:0;
+  z-index:6000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.92);
+  backdrop-filter:blur(25px);
+  animation:fadeIn .3s ease;
+}
+
+.ad-tv-modal.show{display:flex}
+
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+.tv-frame{
+  width:min(900px,94vw);
+  max-height:90vh;
+  background:#090d16;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 25px 80px rgba(0,0,0,.8),0 0 40px rgba(37,99,235,.2);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+
+.tv-stage{
+  position:relative;
+  width:100%;
+  height:380px;
+  background:#000;
+  overflow:hidden;
+}
+
+.tv-media{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.tv-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top,#090d16 0%,transparent 60%,rgba(0,0,0,.5) 100%);
+}
+
+.tv-live-badge{
+  position:absolute;
+  top:16px;
+  left:16px;
+  background:rgba(239,68,68,.85);
+  backdrop-filter:blur(8px);
+  color:white;
+  font-size:10px;
+  font-weight:900;
+  padding:4px 10px;
+  border-radius:20px;
+  letter-spacing:1px;
+}
+
+.tv-live-badge::before{
+  content:'';
+  display:inline-block;
+  width:6px;
+  height:6px;
+  background:white;
+  border-radius:50%;
+  margin-right:6px;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+  0%,100%{opacity:1}
+  50%{opacity:.3}
+}
+
+.tv-close-btn{
+  position:absolute;
+  top:16px;
+  right:16px;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(10px);
+  color:white;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+}
+
+.tv-brand-bar{
+  position:absolute;
+  bottom:20px;
+  left:20px;
+  right:20px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  z-index:5;
+}
+
+.tv-brand-logo{
+  width:64px;
+  height:64px;
+  border-radius:16px;
+  object-fit:cover;
+  background:white;
+  padding:4px;
+  box-shadow:0 8px 25px rgba(0,0,0,.5);
+}
+
+.tv-brand-info h2{
+  color:white;
+  font-size:22px;
+  font-weight:900;
+  text-shadow:0 2px 8px rgba(0,0,0,.8);
+}
+
+.tv-brand-info p{
+  color:rgba(255,255,255,.75);
+  font-size:12px;
+  font-weight:700;
+}
+
+.tv-body{
+  padding:24px;
+  overflow-y:auto;
+  max-height:calc(90vh - 380px);
+  color:white;
+}
+
+.tv-desc{
+  font-size:14px;
+  line-height:1.6;
+  color:#94a3b8;
+  margin-bottom:20px;
+}
+
+.tv-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.tv-stat-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  padding:12px;
+  border-radius:14px;
+}
+
+.tv-stat-card label{
+  display:block;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  color:#64748b;
+  font-weight:800;
+  margin-bottom:4px;
+}
+
+.tv-stat-card span{
+  font-size:13px;
+  font-weight:800;
+  color:#f1f5f9;
+}
+
+.tv-action-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.tv-btn{
+  padding:14px;
+  border-radius:14px;
+  font-weight:900;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+.tv-btn-primary{
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  color:white;
+}
+
+.tv-btn-secondary{
+  background:rgba(255,255,255,.08);
+  color:white;
+  border:1px solid rgba(255,255,255,.1);
+}
 
 .modal{
-    position:absolute;
-    inset:0;
-    z-index:100;
-    background:rgba(0,0,0,.96);
-    padding:14px;
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  background:rgba(0,0,0,.7);
+  backdrop-filter:blur(8px);
 }
 
-.search-input{
-    width:100%;
-    background:#151515;
-    border:1px solid #333;
-    border-radius:13px;
-    padding:12px 14px;
-    color:#fff;
-    outline:none;
-    font-size:13px;
+.modal.show{display:flex}
+
+.modal-card{
+  width:min(600px,100%);
+  max-height:90vh;
+  overflow-y:auto;
+  background:var(--card);
+  color:var(--text);
+  border-radius:25px 25px 0 0;
+  padding:20px;
+  animation:up .25s ease;
 }
 
-.search-result{
-    background:#121212;
-    border:1px solid #292929;
-    border-radius:13px;
-    padding:12px;
-    margin-top:8px;
-    text-align:left;
-    width:100%;
+@keyframes up{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
 }
 
-.comments-panel{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    z-index:120;
-    background:#0d0d0d;
-    border-top:1px solid #333;
-    border-radius:25px 25px 0 0;
-    transform:translateY(100%);
-    transition:.3s;
-}
-
-.comments-panel.open{
-    transform:translateY(0);
+.modal-close{
+  float:right;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  background:var(--soft);
+  color:var(--text);
+  font-size:18px;
 }
 
 .comment-list{
-    max-height:280px;
-    overflow-y:auto;
-    padding:13px;
+  display:grid;
+  gap:10px;
+  margin:15px 0;
 }
 
-.share-modal{
-    position:absolute;
-    inset:0;
-    z-index:130;
-    background:rgba(0,0,0,.75);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
+.comment{
+  background:var(--soft);
+  padding:12px;
+  border-radius:12px;
 }
 
-.share-box{
-    width:100%;
-    max-width:380px;
-    background:#111;
-    border:1px solid #333;
-    border-radius:24px;
-    padding:20px;
+.comment-name{
+  font-size:11px;
+  font-weight:900;
 }
 
-/* ================= UTIL ================= */
-
-.hidden{
-    display:none !important;
+.comment-text{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:3px;
 }
 
-@keyframes heartPop{
-    0%{
-        transform:scale(.2);
-        opacity:0;
-    }
-    30%{
-        transform:scale(1.3);
-        opacity:1;
-    }
-    100%{
-        transform:scale(1);
-        opacity:0;
-    }
+.comment-input{
+  display:flex;
+  gap:7px;
 }
 
-.heart-pop{
-    animation:heartPop .8s forwards;
+.comment-input input{
+  flex:1;
+  height:44px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:0 12px;
+  background:var(--card);
+  color:var(--text);
+}
+
+.share-options{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-top:15px;
+}
+
+.share-btn{
+  padding:14px;
+  border-radius:14px;
+  background:var(--soft);
+  color:var(--text);
+  font-weight:900;
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:25px;
+  transform:translate(-50%,20px);
+  background:#111827;
+  color:white;
+  padding:11px 17px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:800;
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  z-index:9000;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+.loading{
+  padding:35px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  grid-column:1/-1;
+}
+
+@media(max-width:1200px){
+  .business-grid,
+  .logo-wall,
+  .ad-wall{
+    grid-template-columns:repeat(5,1fr);
+  }
+}
+
+@media(max-width:900px){
+  .news-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .business-grid,
+  .logo-wall,
+  .ad-wall{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .tv-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:600px){
+
+  .topbar{height:60px}
+  .main-nav{top:60px}
+
+  .screen{
+    min-height:calc(100vh - 106px);
+  }
+
+  .container{padding:12px}
+
+  .news-grid{
+    grid-template-columns:1fr;
+  }
+
+  .news-image{height:210px}
+
+  .business-filters{
+    grid-template-columns:1fr !important;
+    gap:8px;
+  }
+
+  .business-filters input,
+  .business-filters select{
+    height:45px;
+  }
+
+  .business-grid,
+  .logo-wall,
+  .ad-wall{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .business-tile{
+    min-height:200px;
+  }
+
+  .reels-feed,
+  .reel-slide{
+    height:calc(100vh - 106px);
+  }
+
+  .tv-stage{height:240px}
+
+  .tv-brand-bar{
+    bottom:12px;
+    left:12px;
+    right:12px;
+    gap:10px;
+  }
+
+  .tv-brand-logo{
+    width:48px;
+    height:48px;
+  }
+
+  .tv-brand-info h2{
+    font-size:17px;
+  }
+
+  .tv-grid{
+    grid-template-columns:1fr;
+  }
+
+  .tv-action-row{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<header class="topbar">
 
-<!-- =====================================================
-     HEADER
-===================================================== -->
+  <div class="brand" onclick="showScreen('news')">
 
-<header class="header">
+    <div class="logo-mark">M</div>
 
-    <div class="flex items-center justify-between">
+    <div>
+      <div class="brand-title">
+        ONE MINUTE NEWS
+      </div>
 
-        <div class="flex items-center gap-2">
-
-            <span class="live">LIVE</span>
-
-            <div class="logo">
-                ONE<span>MINUTE</span> NEWS
-            </div>
-
-        </div>
-
-        <div class="flex items-center gap-2">
-
-            <div class="mode-switch">
-
-                <button
-                    id="newsTab"
-                    class="mode-active"
-                    onclick="showNews()">
-                    News
-                </button>
-
-                <span class="text-zinc-600">|</span>
-
-                <button
-                    id="videoTab"
-                    class="mode-inactive"
-                    onclick="showVideos()">
-                    Videos
-                </button>
-
-            </div>
-
-            <button
-                onclick="openSearch()"
-                class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800">
-                🔍
-            </button>
-
-        </div>
-
+      <div class="brand-sub">
+        MILLIONPIXEL • DIGITAL BUSINESS WALL
+      </div>
     </div>
 
-    <div class="breaking">
+  </div>
 
-        <span class="breaking-dot"></span>
+  <div class="top-actions">
 
-        <b class="text-red-400 text-[8px]">
-            BREAKING
-        </b>
+    <button
+      class="icon-btn"
+      onclick="toggleTheme()"
+      title="Theme">
+      ◐
+    </button>
 
-        <span
-            id="breakingText"
-            class="text-[9px] text-zinc-300 truncate">
-            Latest breaking news updates...
-        </span>
+  </div>
+
+</header>
+
+<nav class="main-nav">
+
+  <button
+    class="nav-btn active"
+    id="nav-news"
+    onclick="showScreen('news')">
+    📰 News
+  </button>
+
+  <button
+    class="nav-btn"
+    id="nav-reels"
+    onclick="showScreen('reels')">
+    🎬 Reels
+  </button>
+
+  <button
+    class="nav-btn"
+    id="nav-business"
+    onclick="showScreen('business')">
+    🏢 Business Wall
+  </button>
+
+</nav>
+
+<div class="breaking">
+
+  <span class="breaking-badge">
+    LIVE
+  </span>
+
+  <span
+    class="breaking-text"
+    id="breakingText">
+    Latest updates from MILLIONPIXEL
+  </span>
+
+</div>
+
+<section
+  class="screen active"
+  id="screen-news">
+
+  <div class="container">
+
+    <h1 id="oneMinuteNewsHeading" class="one-minute-news-heading">ONE MINUTE NEWS</h1>
+
+    <div class="search-box">
+
+      <input
+        id="newsSearch"
+        placeholder="Search news..."
+        oninput="renderNews()">
 
     </div>
 
     <div class="categories">
 
-        <button data-category="all"
-            class="category active"
-            onclick="setCategory('all')">
-            All
-        </button>
+      <button
+        class="category active"
+        onclick="setCategory('All',this)">
+        All
+      </button>
 
-        <button data-category="business"
-            class="category"
-            onclick="setCategory('business')">
-            💼 Business
-        </button>
+      <button
+        class="category"
+        onclick="setCategory('Business',this)">
+        Business
+      </button>
 
-        <button data-category="sports"
-            class="category"
-            onclick="setCategory('sports')">
-            🏆 Sports
-        </button>
+      <button
+        class="category"
+        onclick="setCategory('Sports',this)">
+        Sports
+      </button>
 
-        <button data-category="cinema"
-            class="category"
-            onclick="setCategory('cinema')">
-            🎬 Cinema
-        </button>
+      <button
+        class="category"
+        onclick="setCategory('Cinema',this)">
+        Cinema
+      </button>
 
-        <button data-category="tech"
-            class="category"
-            onclick="setCategory('tech')">
-            💻 Tech
-        </button>
+      <button
+        class="category"
+        onclick="setCategory('Tech',this)">
+        Tech
+      </button>
 
-        <button data-category="politics"
-            class="category"
-            onclick="setCategory('politics')">
-            🏛️ Politics
-        </button>
+      <button
+        class="category"
+        onclick="setCategory('Politics',this)">
+        Politics
+      </button>
 
     </div>
 
-</header>
+    <div class="section-title">
 
+      <h2>Latest News</h2>
 
-<!-- NEWS -->
+      <span id="newsCount">
+        0 stories
+      </span>
 
-<main id="newsScreen" class="news-screen">
-    <div id="newsContainer"></div>
-</main>
+    </div>
 
+    <div
+      id="newsGrid"
+      class="news-grid">
 
-<!-- VIDEOS -->
+      <div class="loading">
+        Loading news...
+      </div>
 
-<main id="videoScreen" class="video-screen hidden">
-    <div id="videoContainer"></div>
-</main>
+    </div>
 
+    <div class="section-title">
 
-<!-- BOTTOM NAV -->
+      <h2>Latest Reels</h2>
 
-<nav class="bottom-nav">
+      <span>
+        Watch now
+      </span>
 
-    <button id="feedNav"
-        class="nav-button active"
-        onclick="goFeed()">
-        <span>⚡</span>
-        Feed
-    </button>
+    </div>
 
-    <button id="exploreNav"
-        class="nav-button"
-        onclick="goVideos()">
-        <span>▶️</span>
-        Videos
-    </button>
+    <div
+      id="newsReelsStrip"
+      class="reels-strip">
 
-    <button id="trendingNav"
-        class="nav-button"
-        onclick="goTrending()">
-        <span>🔥</span>
-        Trending
-    </button>
+      <div class="loading">
+        Loading reels...
+      </div>
 
-    <button id="savedNav"
-        class="nav-button"
-        onclick="showSaved()">
-        <span>🔖</span>
-        Saved
-    </button>
+    </div>
 
-</nav>
+    <div class="section-title">
 
+      <h2>Trending</h2>
 
-<!-- SEARCH -->
+      <span>
+        Top stories
+      </span>
 
-<div id="searchModal" class="modal hidden">
+    </div>
 
-    <div class="flex gap-2">
+    <div
+      id="trendingList"
+      class="trending-list">
 
-        <input
-            id="searchInput"
-            class="search-input"
-            placeholder="Search news..."
-            oninput="searchNews(this.value)">
+      <div class="loading">
+        Loading...
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section
+  class="screen reels-screen"
+  id="screen-reels">
+
+  <div
+    id="reelsFeed"
+    class="reels-feed">
+
+    <div
+      class="loading"
+      style="color:white">
+      Loading reels...
+    </div>
+
+  </div>
+
+</section>
+
+<section
+  class="screen"
+  id="screen-business">
+
+  <div class="container">
+
+    <div class="business-head">
+
+      <h1>
+        MILLIONPIXEL
+      </h1>
+
+      <p>
+        DIGITAL BUSINESS WALL • LIVE BUSINESS DISCOVERY
+      </p>
+
+      <div class="business-status">
+        <span class="live-dot"></span>
+        LIVE BUSINESS DATABASE
+      </div>
+
+      <div class="business-timer">
+
+        <div
+          id="businessTimerFill"
+          class="business-timer-fill">
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="business-controls">
+
+      <button
+        id="wall-live"
+        class="wall-btn active"
+        onclick="setBusinessView('live')">
+        🔴 Live View
+      </button>
+
+      <button
+        id="wall-logos"
+        class="wall-btn"
+        onclick="setBusinessView('logos')">
+        ◉ Business Logos
+      </button>
+
+      <button
+        id="wall-ads"
+        class="wall-btn"
+        onclick="setBusinessView('ads')">
+        ▶ Business Ads
+      </button>
+
+    </div>
+
+    <div class="business-filters">
+
+      <input
+        id="businessSearch"
+        type="search"
+        placeholder="🔍 Search business, city, state, sector..."
+        oninput="applyBusinessFilters()">
+
+      <select
+        id="businessState"
+        onchange="applyBusinessFilters()">
+
+        <option value="">
+          🇮🇳 All States / UTs
+        </option>
+
+      </select>
+
+      <select
+        id="businessSector"
+        onchange="applyBusinessFilters()">
+
+        <option value="">
+          🏢 All Business Sectors
+        </option>
+
+      </select>
+
+    </div>
+
+    <div
+      id="businessPageInfo"
+      class="business-page-info">
+
+      <span id="businessPageText">
+        Loading businesses...
+      </span>
+
+      <div class="business-page-actions">
 
         <button
-            onclick="closeSearch()"
-            class="w-12 rounded-xl bg-zinc-900 border border-zinc-800">
-            ✕
+          id="businessPrev"
+          class="business-page-btn"
+          onclick="previousBusinessSlide()">
+          ‹
         </button>
-
-    </div>
-
-    <div id="searchResults"></div>
-
-</div>
-
-
-<!-- COMMENTS -->
-
-<div id="commentsPanel" class="comments-panel">
-
-    <div class="p-4 border-b border-zinc-800 flex justify-between">
-
-        <b>Comments</b>
-
-        <button onclick="closeComments()">
-            ✕
-        </button>
-
-    </div>
-
-    <div id="commentList" class="comment-list">
-        <div class="text-center text-zinc-600 text-xs">
-            Loading comments...
-        </div>
-    </div>
-
-    <div class="p-3 border-t border-zinc-800 flex gap-2">
-
-        <input
-            id="commentInput"
-            class="flex-1 bg-zinc-900 rounded-full px-4 py-2 text-xs outline-none"
-            placeholder="Write a comment...">
 
         <button
-            onclick="postComment()"
-            class="bg-red-600 rounded-full px-4 text-xs font-bold">
-            Post
+          id="businessPause"
+          class="business-page-btn business-pause"
+          onclick="toggleBusinessPause()">
+          ⏸ Pause
         </button>
 
-    </div>
+        <button
+          id="businessNext"
+          class="business-page-btn"
+          onclick="nextBusinessSlide()">
+          ›
+        </button>
 
-</div>
-
-
-<!-- SHARE -->
-
-<div id="shareModal" class="share-modal hidden">
-
-    <div class="share-box">
-
-        <div class="flex justify-between mb-6">
-
-            <b>Share News</b>
-
-            <button onclick="closeShare()">
-                ✕
-            </button>
-
-        </div>
-
-        <div class="grid grid-cols-4 gap-4 text-center text-[9px]">
-
-            <button onclick="shareWhatsApp()">
-                <div class="w-12 h-12 mx-auto rounded-full bg-green-600 flex items-center justify-center text-xl">
-                    💬
-                </div>
-                <div class="mt-2">WhatsApp</div>
-            </button>
-
-            <button onclick="shareTelegram()">
-                <div class="w-12 h-12 mx-auto rounded-full bg-blue-500 flex items-center justify-center text-xl">
-                    ✈️
-                </div>
-                <div class="mt-2">Telegram</div>
-            </button>
-
-            <button onclick="copyShare()">
-                <div class="w-12 h-12 mx-auto rounded-full bg-zinc-700 flex items-center justify-center text-xl">
-                    🔗
-                </div>
-                <div class="mt-2">Copy</div>
-            </button>
-
-            <button onclick="nativeShare()">
-                <div class="w-12 h-12 mx-auto rounded-full bg-purple-600 flex items-center justify-center text-xl">
-                    📤
-                </div>
-                <div class="mt-2">More</div>
-            </button>
-
-        </div>
+      </div>
 
     </div>
 
+    <div id="businessContent">
+
+      <div class="loading">
+        Loading businesses...
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<div
+  class="ad-tv-modal"
+  id="businessModal"
+  onclick="closeModalOutside(event,'businessModal')">
+
+  <div class="tv-frame">
+
+    <div
+      class="tv-stage"
+      id="tvStage">
+
+      <div class="tv-overlay"></div>
+
+      <div class="tv-live-badge">
+        BUSINESS FEATURE
+      </div>
+
+      <button
+        class="tv-close-btn"
+        onclick="closeModal('businessModal')">
+        ×
+      </button>
+
+      <div class="tv-brand-bar">
+
+        <img
+          id="tvLogo"
+          class="tv-brand-logo"
+          src=""
+          alt="Logo">
+
+        <div class="tv-brand-info">
+
+          <h2 id="tvName">
+            Brand Name
+          </h2>
+
+          <p id="tvSector">
+            Sector / Category
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="tv-body">
+
+      <p
+        class="tv-desc"
+        id="tvDesc">
+        Business description goes here...
+      </p>
+
+      <div class="tv-grid">
+
+        <div class="tv-stat-card">
+
+          <label>
+            📍 Location
+          </label>
+
+          <span id="tvLocation">
+            City, State
+          </span>
+
+        </div>
+
+        <div class="tv-stat-card">
+
+          <label>
+            📞 Contact
+          </label>
+
+          <span id="tvPhone">
+            N/A
+          </span>
+
+        </div>
+
+        <div class="tv-stat-card">
+
+          <label>
+            🌐 Website
+          </label>
+
+          <span id="tvWebsite">
+            N/A
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="tv-action-row">
+
+        <a
+          id="tvCallLink"
+          href="#"
+          class="tv-btn tv-btn-primary"
+          target="_blank">
+          📞 Contact Now
+        </a>
+
+        <button
+          class="tv-btn tv-btn-secondary"
+          onclick="shareBusinessDetails()">
+          📤 Share Business
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
+<div
+  class="modal"
+  id="commentsModal"
+  onclick="closeModalOutside(event,'commentsModal')">
+
+  <div class="modal-card">
+
+    <button
+      class="modal-close"
+      onclick="closeModal('commentsModal')">
+      ×
+    </button>
+
+    <h2>
+      Comments
+    </h2>
+
+    <div
+      id="commentList"
+      class="comment-list">
+    </div>
+
+    <div class="comment-input">
+
+      <input
+        id="commentInput"
+        placeholder="Write a comment...">
+
+      <button
+        class="action"
+        style="background:var(--primary);color:white;"
+        onclick="submitComment()">
+        Send
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div
+  class="modal"
+  id="shareModal"
+  onclick="closeModalOutside(event,'shareModal')">
+
+  <div class="modal-card">
+
+    <button
+      class="modal-close"
+      onclick="closeModal('shareModal')">
+      ×
+    </button>
+
+    <h2>
+      Share
+    </h2>
+
+    <div class="share-options">
+
+      <button
+        class="share-btn"
+        onclick="shareWhatsApp()">
+        🟢 WhatsApp
+      </button>
+
+      <button
+        class="share-btn"
+        onclick="shareTelegram()">
+        🔵 Telegram
+      </button>
+
+      <button
+        class="share-btn"
+        onclick="copyShareLink()">
+        📋 Copy Link
+      </button>
+
+      <button
+        class="share-btn"
+        onclick="nativeShare()">
+        📤 Native Share
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div
+  class="toast"
+  id="toast">
+</div>
 
 <script>
 
-/* =====================================================
-   SUPABASE CONFIG
-===================================================== */
-
 const SUPABASE_URL =
-    "https://eaowxilhfzyukzetgqxo.supabase.co";
+"https://eaowxilhfzyukzetgqxo.supabase.co";
 
 const SUPABASE_KEY =
-    "sb_publishable_Z3xsADypaOjX8GEQEOLUdg_vbxynHRx";
+"sb_publishable_Z3xsADypaOjX8GEQEOLUdg_vbxynHRx";
 
 const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const BUSINESSES_PER_SLIDE = 14;
+const BUSINESS_SLIDE_MS = 45000;
+
+let newsData = [];
+let reelsData = [];
+let businessData = [];
+let filteredBusinesses = [];
+
+let currentCategory = "All";
+
+let businessSlide = 0;
+let businessView = "live";
+let businessTimer = null;
+let businessPaused = false;
+
+let currentShareData = null;
+let currentCommentTarget = null;
+
+let likedItems = new Set();
+let commentsStore = {};
+
+let reelObserver = null;
+
+
+/* =========================================================
+   BASIC HELPERS
+========================================================= */
+
+function esc(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function value(obj,...keys){
+
+  for(const key of keys){
+
+    if(
+      obj &&
+      obj[key] !== undefined &&
+      obj[key] !== null &&
+      String(obj[key]).trim() !== ""
+    ){
+      return obj[key];
+    }
+
+  }
+
+  return "";
+
+}
+
+
+/* =========================================================
+   VIDEO DETECTION
+========================================================= */
+
+function isVideoMedia(url,obj={}){
+
+  const type =
+    String(
+      value(
+        obj,
+        "media_type",
+        "mime_type",
+        "content_type",
+        "file_type",
+        "type"
+      )
+      || ""
+    ).toLowerCase();
+
+  if(type.startsWith("video/")){
+    return true;
+  }
+
+  return /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i
+    .test(String(url || ""));
+
+}
+
+
+/* =========================================================
+   REEL VIDEO AUTOPLAY
+========================================================= */
+
+function prepareReelVideo(video){
+
+  if(!video) return;
+
+  video.muted = true;
+  video.defaultMuted = true;
+  video.autoplay = true;
+  video.loop = true;
+  video.playsInline = true;
+
+  video.setAttribute("muted","");
+  video.setAttribute("autoplay","");
+  video.setAttribute("playsinline","");
+  video.setAttribute("webkit-playsinline","");
+  video.setAttribute("preload","auto");
+
+}
+
+
+function playReelVideo(video){
+
+  if(!video) return;
+
+  prepareReelVideo(video);
+
+  const promise =
+    video.play();
+
+  if(
+    promise &&
+    typeof promise.catch === "function"
+  ){
+
+    promise.catch(() => {});
+
+  }
+
+}
+
+
+function pauseReelVideo(video){
+
+  if(!video) return;
+
+  try{
+    video.pause();
+  }catch(e){}
+
+}
+
+
+/* =========================================================
+   REEL OBSERVER
+========================================================= */
+
+function setupReelAutoplay(){
+
+  if(reelObserver){
+
+    reelObserver.disconnect();
+    reelObserver = null;
+
+  }
+
+  const feed =
+    document.getElementById("reelsFeed");
+
+  if(!feed) return;
+
+  const videos =
+    feed.querySelectorAll(
+      ".reel-slide video.reel-video"
+    );
+
+  if(!videos.length) return;
+
+
+  /*
+    Mobile-friendly autoplay:
+    Only the reel currently visible on screen plays.
+  */
+
+  reelObserver =
+    new IntersectionObserver(
+      entries => {
+
+        entries.forEach(entry => {
+
+          const video =
+            entry.target;
+
+          if(entry.isIntersecting && entry.intersectionRatio >= .60){
+
+            playReelVideo(video);
+
+          }else{
+
+            pauseReelVideo(video);
+
+          }
+
+        });
+
+      },
+      {
+        root:feed,
+        threshold:[0,.25,.60,.85,1]
+      }
     );
 
 
-/* =====================================================
-   FALLBACK NEWS
-   Used only when DB is empty/unavailable
-===================================================== */
+  videos.forEach(video => {
 
-const fallbackNewsData = [
+    prepareReelVideo(video);
 
-{
-    id:"demo-news-1",
-    category:"business",
-    tag:"MARKETS",
-    time:"5 mins ago",
-    title:"India Markets Start Strong As Investors React To Latest Economic Signals",
-    description:"Markets remain active as investors track economic growth, business activity and global developments.",
-    image:"https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=900&q=80",
-    views:102000,
-    likes:45100,
-    shares:12000,
-    source:"One Minute Business"
-},
+    reelObserver.observe(video);
 
-{
-    id:"demo-news-2",
-    category:"sports",
-    tag:"CRICKET",
-    time:"12 mins ago",
-    title:"Cricket Fans Celebrate A Spectacular Batting Performance",
-    description:"The latest match delivers a major performance that quickly becomes one of the day's biggest sports stories.",
-    image:"https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=900&q=80",
-    views:189000,
-    likes:88200,
-    shares:24000,
-    source:"One Minute Sports"
-},
+  });
 
-{
-    id:"demo-news-3",
-    category:"cinema",
-    tag:"CINEMA",
-    time:"24 mins ago",
-    title:"New Pan-India Movie Creates Huge Buzz Across Social Media",
-    description:"The latest release attracts strong audience attention with impressive opening-day discussions.",
-    image:"https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80",
-    views:241000,
-    likes:112400,
-    shares:35000,
-    source:"One Minute Cinema"
-},
 
-{
-    id:"demo-news-4",
-    category:"tech",
-    tag:"AI & TECH",
-    time:"35 mins ago",
-    title:"New AI Tools Are Changing The Way People Work And Learn",
-    description:"Artificial intelligence continues to expand into education, productivity and everyday digital services.",
-    image:"https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80",
-    views:91000,
-    likes:43100,
-    shares:11000,
-    source:"One Minute Tech"
-},
+  /*
+    First reel: immediately attempt autoplay.
+  */
 
-{
-    id:"demo-news-5",
-    category:"politics",
-    tag:"INDIA",
-    time:"48 mins ago",
-    title:"Important National Developments Become Today's Major Talking Point",
-    description:"Political and policy developments remain among the most discussed stories of the day.",
-    image:"https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=900&q=80",
-    views:155000,
-    likes:67400,
-    shares:20000,
-    source:"One Minute India"
-},
+  if(videos[0]){
 
-{
-    id:"demo-news-6",
-    category:"business",
-    tag:"STARTUPS",
-    time:"1 hour ago",
-    title:"Indian Startups Continue To Attract Attention From Global Investors",
-    description:"Technology-focused businesses remain a major area of interest for investors and entrepreneurs.",
-    image:"https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=80",
-    views:76000,
-    likes:39800,
-    shares:9000,
-    source:"One Minute Business"
+    setTimeout(() => {
+
+      playReelVideo(videos[0]);
+
+    },100);
+
+  }
+
 }
 
-];
 
+/* =========================================================
+   TOAST
+========================================================= */
 
-const fallbackTrendingData = [
+function showToast(message){
 
-{
-    id:"demo-trend-1",
-    title:"Latest cricket performance dominates today's discussions",
-    time:"Trending now"
-},
+  const toast =
+    document.getElementById("toast");
 
-{
-    id:"demo-trend-2",
-    title:"New AI technology becomes one of today's biggest stories",
-    time:"Trending now"
-},
+  toast.textContent =
+    message;
 
-{
-    id:"demo-trend-3",
-    title:"Pan-India cinema release creates huge social media buzz",
-    time:"Trending now"
-},
+  toast.classList.add("show");
 
-{
-    id:"demo-trend-4",
-    title:"Markets react to important economic developments",
-    time:"Trending now"
-},
+  clearTimeout(showToast.timer);
 
-{
-    id:"demo-trend-5",
-    title:"Major national policy update attracts public attention",
-    time:"Trending now"
+  showToast.timer =
+    setTimeout(
+      () =>
+        toast.classList.remove("show"),
+      2200
+    );
+
 }
 
-];
+
+/* =========================================================
+   SCREEN NAVIGATION
+========================================================= */
+
+function showScreen(screen){
+
+  document
+    .querySelectorAll(".screen")
+    .forEach(x =>
+      x.classList.remove("active")
+    );
+
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach(x =>
+      x.classList.remove("active")
+    );
+
+  const target =
+    document.getElementById(
+      "screen-" + screen
+    );
+
+  const nav =
+    document.getElementById(
+      "nav-" + screen
+    );
+
+  if(target){
+
+    target.classList.add("active");
+
+  }
+
+  if(nav){
+
+    nav.classList.add("active");
+
+  }
 
 
-const fallbackVideoData = [
+  if(screen === "reels"){
 
-{
-    id:"demo-video-101",
-    tag:"TOP NEWS",
-    title:"One Minute News — Today's Biggest Headlines",
-    description:"The important stories you need to know in under one minute.",
-    video:"https://cdn.coverr.co/videos/coverr-a-man-working-on-his-laptop-1574/1080p.mp4"
-},
+    setTimeout(() => {
 
-{
-    id:"demo-video-102",
-    tag:"SPORTS",
-    title:"Sports News In 60 Seconds",
-    description:"Fast sports updates, results and major moments.",
-    video:"https://cdn.coverr.co/videos/coverr-football-player-running-1572/1080p.mp4"
-},
+      setupReelAutoplay();
 
-{
-    id:"demo-video-103",
-    tag:"TECH",
-    title:"Technology News In One Minute",
-    description:"AI, gadgets, startups and the latest technology stories.",
-    video:"https://cdn.coverr.co/videos/coverr-a-woman-using-a-smartphone-1575/1080p.mp4"
+    },100);
+
+  }
+
+
+  if(screen === "business"){
+
+    if(!businessData.length){
+
+      loadBusinesses();
+
+    }else{
+
+      startBusinessRotation();
+
+    }
+
+  }else{
+
+    stopBusinessRotation();
+
+  }
+
 }
 
-];
+
+/* =========================================================
+   THEME
+========================================================= */
+
+function toggleTheme(){
+
+  document.body.classList.toggle("dark");
+
+  localStorage.setItem(
+    "millionpixel_theme",
+    document.body.classList.contains("dark")
+      ? "dark"
+      : "light"
+  );
+
+}
 
 
-/* =====================================================
-   LIVE DATA
-===================================================== */
+function loadTheme(){
 
-let newsData=[];
-let trendingData=[];
-let videoData=[];
+  if(
+    localStorage.getItem(
+      "millionpixel_theme"
+    ) === "dark"
+  ){
 
-let currentCategory="all";
+    document.body.classList.add("dark");
 
-let savedItems=JSON.parse(
-    localStorage.getItem("oneMinuteSaved") || "[]"
-);
+  }
 
-let likedNews=JSON.parse(
-    localStorage.getItem("oneMinuteLikedNews") || "{}"
-);
-
-let likedVideos=JSON.parse(
-    localStorage.getItem("oneMinuteLikedVideos") || "{}"
-);
-
-let viewedNews=JSON.parse(
-    localStorage.getItem("oneMinuteViewedNews") || "[]"
-);
-
-let shareTitle="One Minute News";
-
-let currentCommentNewsId=null;
-let currentCommentVideoId=null;
-
-let currentShareNewsId=null;
-
-let muted=true;
+}
 
 
-/* =====================================================
-   LOAD NEWS FROM SUPABASE
-===================================================== */
+/* =========================================================
+   LOAD NEWS + REAL REELS SEPARATELY
+========================================================= */
 
 async function loadNews(){
 
-    try{
+  try{
 
-        const {data,error}=await supabaseClient
-            .from("news")
-            .select("*")
-            .eq("published",true)
-            .order("published_at",{ascending:false});
+    /*
+      NEWS TABLE
+      Only actual news is loaded here.
+    */
 
-        if(error){
-            console.error("News DB error:",error);
-            newsData=[...fallbackNewsData];
-            return;
-        }
+    const newsResult =
+      await supabaseClient
+        .from("news")
+        .select("*")
+        .eq("published",true)
+        .order("published_at",{ascending:false})
+        .limit(100);
 
-        if(data && data.length){
+    if(newsResult.error){
 
-            newsData=data.map(item=>({
-
-                id:item.id,
-
-                category:item.category || "all",
-
-                tag:item.tag || "NEWS",
-
-                time:formatTime(item.published_at),
-
-                title:item.title || "",
-
-                description:item.description || "",
-
-                image:item.image_url || "",
-
-                views:Number(item.views || 0),
-
-                likes:Number(item.likes || 0),
-
-                shares:Number(item.shares || 0),
-
-                source:item.source || "One Minute News"
-
-            }));
-
-        }else{
-
-            newsData=[...fallbackNewsData];
-
-        }
-
-    }catch(error){
-
-        console.error(error);
-
-        newsData=[...fallbackNewsData];
+      throw newsResult.error;
 
     }
 
-}
+    newsData =
+      newsResult.data || [];
 
 
-/* =====================================================
-   LOAD TRENDING
-===================================================== */
+    /*
+      IMPORTANT:
+      Do NOT convert all news into reels.
 
-async function loadTrending(){
+      First try the dedicated reels table.
+    */
+
+    let dedicatedReels = [];
 
     try{
 
-        const {data,error}=await supabaseClient
-            .from("trending")
-            .select("*")
-            .eq("published",true)
-            .order("rank",{ascending:true});
+      const reelResult =
+        await supabaseClient
+          .from("reels")
+          .select("*")
+          .order("created_at",{ascending:false})
+          .limit(100);
 
-        if(error){
+      if(!reelResult.error){
 
-            console.error(
-                "Trending DB error:",
-                error
+        dedicatedReels =
+          reelResult.data || [];
+
+      }
+
+    }catch(reelError){
+
+      console.warn(
+        "Dedicated reels table unavailable:",
+        reelError
+      );
+
+    }
+
+
+    /*
+      If dedicated reels table exists,
+      use those records.
+
+      Otherwise only use NEWS records that are
+      explicitly marked as reels.
+    */
+
+    if(dedicatedReels.length){
+
+      reelsData =
+        dedicatedReels.filter(item => {
+
+          const video =
+            value(
+              item,
+              "video_url",
+              "reel_url",
+              "media_url",
+              "video"
             );
 
-            trendingData=[
-                ...fallbackTrendingData
-            ];
-
-            return;
-
-        }
-
-        if(data && data.length){
-
-            trendingData=data.map(item=>({
-
-                id:item.id,
-
-                title:item.title || "",
-
-                time:item.time || "Trending now"
-
-            }));
-
-        }else{
-
-            trendingData=[
-                ...fallbackTrendingData
-            ];
-
-        }
-
-    }catch(error){
-
-        trendingData=[
-            ...fallbackTrendingData
-        ];
-
-    }
-
-}
-
-
-/* =====================================================
-   LOAD VIDEOS
-===================================================== */
-
-async function loadVideos(){
-
-    try{
-
-        const {data,error}=await supabaseClient
-            .from("videos")
-            .select("*")
-            .eq("published",true)
-            .order("created_at",{ascending:false});
-
-        if(error){
-
-            console.error(
-                "Videos DB error:",
-                error
+          const explicitReel =
+            value(
+              item,
+              "is_reel"
             );
 
-            videoData=[
-                ...fallbackVideoData
-            ];
+          return (
+            !!video ||
+            explicitReel === true ||
+            String(explicitReel).toLowerCase()
+              === "true"
+          );
 
-            return;
+        });
 
-        }
+    }else{
 
-        if(data && data.length){
+      reelsData =
+        newsData.filter(item => {
 
-            videoData=data.map(item=>({
+          const video =
+            value(
+              item,
+              "video_url",
+              "reel_url",
+              "media_url",
+              "video"
+            );
 
-                id:item.id,
+          const explicitReel =
+            value(
+              item,
+              "is_reel"
+            );
 
-                tag:item.tag || "VIDEO",
+          const type =
+            value(
+              item,
+              "media_type",
+              "mime_type",
+              "content_type",
+              "file_type",
+              "type"
+            );
 
-                title:item.title || "",
 
-                description:item.description || "",
+          return (
+            explicitReel === true ||
+            String(explicitReel).toLowerCase()
+              === "true" ||
+            String(type)
+              .toLowerCase()
+              .startsWith("video/") ||
+            isVideoMedia(video,item)
+          );
 
-                video:item.video_url || "",
-
-                thumbnail:item.thumbnail_url || ""
-
-            }));
-
-        }else{
-
-            videoData=[
-                ...fallbackVideoData
-            ];
-
-        }
-
-    }catch(error){
-
-        videoData=[
-            ...fallbackVideoData
-        ];
+        });
 
     }
+
+
+    /*
+      Breaking text must always come from NEWS,
+      never from reels.
+    */
+
+    if(newsData.length > 0){
+
+      document
+        .getElementById("breakingText")
+        .textContent =
+        value(
+          newsData[0],
+          "title"
+        );
+
+    }
+
+  }catch(err){
+
+    console.error(
+      "News loading error:",
+      err
+    );
+
+    newsData = [];
+    reelsData = [];
+
+  }
+
+
+  renderNews();
+  renderReels();
+  renderTrending();
 
 }
 
 
-/* =====================================================
+/* =========================================================
+   NEWS CATEGORY
+========================================================= */
+
+function setCategory(cat,btn){
+
+  currentCategory =
+    cat;
+
+  document
+    .querySelectorAll(".category")
+    .forEach(b =>
+      b.classList.remove("active")
+    );
+
+  btn.classList.add("active");
+
+  renderNews();
+
+}
+
+
+/* =========================================================
    RENDER NEWS
-===================================================== */
+========================================================= */
 
 function renderNews(){
 
-    const container=
-        document.getElementById(
-            "newsContainer"
+  const grid =
+    document.getElementById(
+      "newsGrid"
+    );
+
+  const search =
+    document
+      .getElementById(
+        "newsSearch"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  let rows =
+    newsData.filter(item => {
+
+      const category =
+        String(
+          value(
+            item,
+            "category"
+          )
+        )
+        .toLowerCase();
+
+      const title =
+        String(
+          value(
+            item,
+            "title"
+          )
+        )
+        .toLowerCase();
+
+      const description =
+        String(
+          value(
+            item,
+            "description"
+          )
+        )
+        .toLowerCase();
+
+
+      const matchesCategory =
+        currentCategory === "All" ||
+        category ===
+        currentCategory.toLowerCase();
+
+
+      const matchesSearch =
+        !search ||
+        title.includes(search) ||
+        description.includes(search);
+
+
+      return (
+        matchesCategory &&
+        matchesSearch
+      );
+
+    });
+
+
+  document
+    .getElementById("newsCount")
+    .textContent =
+    `${rows.length} stories`;
+
+
+  if(!rows.length){
+
+    grid.innerHTML =
+      `<div class="loading">
+        No news found.
+      </div>`;
+
+    return;
+
+  }
+
+
+  grid.innerHTML =
+    rows.map(n => {
+
+      const id =
+        value(n,"id");
+
+      const title =
+        value(n,"title");
+
+      const desc =
+        value(n,"description");
+
+      const image =
+        value(n,"image_url");
+
+      const tag =
+        value(
+          n,
+          "tag",
+          "category"
+        )
+        ||
+        "NEWS";
+
+      const isLiked =
+        likedItems.has(
+          `news_${id}`
         );
 
-    let list =
-        currentCategory==="all"
-        ? newsData
-        : newsData.filter(
-            n=>n.category===currentCategory
-        );
 
-    let html="";
+      return `
 
+        <article class="news-card">
 
-    /* TRENDING */
+          ${
+            image
+            ?
+            `<img
+              class="news-image"
+              src="${esc(image)}"
+              loading="lazy">`
+            :
+            `<div class="news-image"></div>`
+          }
 
-    if(currentCategory==="all"){
+          <div class="news-content">
 
-        html+=`
+            <div class="news-meta">
 
-        <section class="trending">
-
-            <div class="trending-header">
-
-                <div class="trending-title">
-                    🔥 TRENDING
-                </div>
-
-                <div class="trending-sub">
-                    What's hot now
-                </div>
+              <span class="news-tag">
+                ${esc(tag)}
+              </span>
 
             </div>
 
-            <div class="trending-list">
+            <div class="news-title">
+              ${esc(title)}
+            </div>
 
-                ${trendingData.map(
-                    (item,index)=>`
+            <div class="news-desc">
+              ${esc(desc)}
+            </div>
 
-                    <button
-                        onclick="openTrending('${escapeAttribute(item.id)}')"
-                        class="trend-card text-left">
+            <div class="news-actions">
 
-                        <div class="trend-number">
-                            ${index+1}
-                        </div>
+              <button
+                class="action ${isLiked ? "liked" : ""}"
+                onclick="toggleLike('news_${id}',this)">
+                ❤️ Like
+              </button>
 
-                        <div class="trend-text">
-                            ${escapeHTML(item.title)}
-                        </div>
+              <button
+                class="action"
+                onclick="openComments('news_${id}')">
+                💬 Comment
+              </button>
 
-                        <div class="trend-time">
-                            ${escapeHTML(item.time)}
-                        </div>
-
-                    </button>
-
-                `).join("")}
+              <button
+                class="action"
+                onclick="openShare('${esc(title)}')">
+                📤 Share
+              </button>
 
             </div>
 
-        </section>
-
-        `;
-
-    }
-
-
-    html+=`
-
-        <div class="news-heading">
-
-            <h1>
-                ${currentCategory==="all"
-                    ?"LATEST NEWS"
-                    :currentCategory.toUpperCase()}
-            </h1>
-
-            <p>
-                Fast news. Clear information. One minute.
-            </p>
-
-        </div>
-
-    `;
-
-
-    if(!list.length){
-
-        html+=`
-
-        <div class="text-center text-zinc-600 text-xs p-10">
-            No news available in this category.
-        </div>
-
-        `;
-
-    }
-
-
-    list.forEach(item=>{
-
-        const liked=
-            !!likedNews[item.id];
-
-        const saved=
-            savedItems.includes(
-                "news-"+item.id
-            );
-
-        html+=`
-
-        <article
-            id="news-${escapeAttribute(item.id)}"
-            data-news-id="${escapeAttribute(item.id)}"
-            class="news-card">
-
-            <div class="news-photo-wrap">
-
-                <img
-                    src="${escapeAttribute(item.image)}"
-                    class="news-photo"
-                    loading="lazy"
-                    alt="${escapeAttribute(item.title)}"
-                    onerror="this.style.display='none'">
-
-                <span class="news-tag">
-                    ${escapeHTML(item.tag)}
-                </span>
-
-                <button
-                    onclick="speakNews('${escapeAttribute(item.id)}')"
-                    class="news-read"
-                    title="Listen to this news">
-                    🔊
-                </button>
-
-            </div>
-
-
-            <div class="news-body">
-
-                <h2 class="news-title">
-                    ${escapeHTML(item.title)}
-                </h2>
-
-                <p class="news-description">
-                    ${escapeHTML(item.description)}
-                </p>
-
-
-                <div class="news-meta">
-
-                    <span>
-                        👁️ ${formatNumber(item.views)}
-                    </span>
-
-                    <span>•</span>
-
-                    <span>
-                        ❤️ ${formatNumber(item.likes)}
-                    </span>
-
-                    <span>•</span>
-
-                    <span>
-                        ${escapeHTML(item.time)}
-                    </span>
-
-                </div>
-
-
-                <div class="news-source">
-
-                    <div class="source-logo">
-                        1M
-                    </div>
-
-                    <div class="source-name">
-                        ${escapeHTML(item.source)}
-                    </div>
-
-                </div>
-
-
-                <div class="news-actions">
-
-                    <button
-                        onclick="likeNews('${escapeAttribute(item.id)}')"
-                        class="news-action ${liked?"liked":""}">
-
-                        ${liked?"❤️":"♡"}
-                        Like
-
-                    </button>
-
-
-                    <button
-                        onclick="openComments('news','${escapeAttribute(item.id)}')"
-                        class="news-action">
-
-                        💬 Comment
-
-                    </button>
-
-
-                    <button
-                        onclick="openShare('${escapeAttribute(item.id)}')"
-                        class="news-action">
-
-                        ↗️ Share
-
-                    </button>
-
-
-                    <button
-                        onclick="saveNews('${escapeAttribute(item.id)}')"
-                        class="news-action">
-
-                        ${saved?"🔖":"☆"}
-                        ${saved?"Saved":"Save"}
-
-                    </button>
-
-                </div>
-
-            </div>
+          </div>
 
         </article>
 
-        `;
+      `;
 
-    });
-
-
-    container.innerHTML=html;
-
-    setupNewsViewObserver();
+    }).join("");
 
 }
 
 
-/* =====================================================
-   NEWS VIEW TRACKING
-===================================================== */
+/* =========================================================
+   RENDER REELS
+========================================================= */
 
-let newsViewObserver=null;
+function renderReels(){
 
-function setupNewsViewObserver(){
+  const strip =
+    document.getElementById(
+      "newsReelsStrip"
+    );
 
-    if(newsViewObserver){
-        newsViewObserver.disconnect();
-    }
-
-    newsViewObserver=
-        new IntersectionObserver(
-            entries=>{
-
-                entries.forEach(entry=>{
-
-                    if(
-                        entry.isIntersecting &&
-                        entry.intersectionRatio>=.65
-                    ){
-
-                        const id=
-                            entry.target
-                                .getAttribute(
-                                    "data-news-id"
-                                );
-
-                        if(id){
-
-                            incrementNewsView(id);
-
-                        }
-
-                    }
-
-                });
-
-            },
-            {
-                threshold:[.65]
-            }
-        );
-
-
-    document
-        .querySelectorAll(".news-card")
-        .forEach(card=>{
-            newsViewObserver.observe(card);
-        });
-
-}
-
-
-/* =====================================================
-   INCREMENT NEWS VIEW
-===================================================== */
-
-async function incrementNewsView(id){
-
-    if(
-        viewedNews.includes(String(id))
-    ){
-        return;
-    }
-
-    viewedNews.push(String(id));
-
-    localStorage.setItem(
-        "oneMinuteViewedNews",
-        JSON.stringify(viewedNews)
+  const feed =
+    document.getElementById(
+      "reelsFeed"
     );
 
 
-    const item=
-        newsData.find(
-            x=>String(x.id)===String(id)
+  /*
+    CRITICAL FIX:
+    NEVER fallback to newsData.
+
+    If there are no real reels,
+    show "No reels available".
+  */
+
+  const list =
+    reelsData.length
+      ? reelsData
+      : [];
+
+
+  if(!list.length){
+
+    strip.innerHTML =
+      `<div class="loading">
+        No reels available.
+      </div>`;
+
+    feed.innerHTML =
+      `<div
+        class="loading"
+        style="color:white">
+        No reels available.
+      </div>`;
+
+    return;
+
+  }
+
+
+  /* =======================================================
+     LATEST REELS STRIP
+  ======================================================= */
+
+  strip.innerHTML =
+    list.map((r,i) => {
+
+      const video =
+        value(
+          r,
+          "video_url",
+          "reel_url",
+          "media_url",
+          "video"
         );
 
-    if(item){
-
-        item.views=
-            Number(item.views || 0)+1;
-
-        const visibleCard=
-            document.getElementById(
-                "news-"+CSS.escape(String(id))
-            );
-
-        if(visibleCard){
-
-            const meta=
-                visibleCard.querySelector(
-                    ".news-meta"
-                );
-
-            if(meta){
-
-                const firstSpan=
-                    meta.querySelector("span");
-
-                if(firstSpan){
-
-                    firstSpan.innerHTML=
-                        "👁️ "+
-                        formatNumber(item.views);
-
-                }
-
-            }
-
-        }
-
-    }
-
-
-    if(isUUID(id)){
-
-        try{
-
-            const {error}=
-                await supabaseClient.rpc(
-                    "increment_news_views",
-                    {
-                        p_news_id:id
-                    }
-                );
-
-            if(error){
-                console.error(
-                    "View RPC error:",
-                    error
-                );
-            }
-
-        }catch(error){
-
-            console.error(error);
-
-        }
-
-    }
-
-}
-
-
-/* =====================================================
-   VIDEO RENDER
-===================================================== */
-
-function renderVideos(){
-
-    const container=
-        document.getElementById(
-            "videoContainer"
-        );
-
-    container.innerHTML="";
-
-    videoData.forEach(item=>{
-
-        const page=
-            document.createElement("section");
-
-        page.className="video-page";
-
-        page.innerHTML=`
-
-            <video
-                id="video-${escapeAttribute(item.id)}"
-                class="video"
-                src="${escapeAttribute(item.video)}"
-                ${item.thumbnail
-                    ?`poster="${escapeAttribute(item.thumbnail)}"`
-                    :""}
-                loop
-                muted
-                playsinline
-                preload="metadata"
-                onclick="toggleVideo('${escapeAttribute(item.id)}')">
-            </video>
-
-            <div class="video-gradient"></div>
-
-
-            <div
-                id="videoHeart-${escapeAttribute(item.id)}"
-                class="absolute inset-0 z-30
-                flex items-center justify-center
-                pointer-events-none">
-            </div>
-
-
-            <div class="video-info">
-
-                <span class="video-tag">
-                    ${escapeHTML(item.tag)}
-                </span>
-
-                <div class="video-title">
-                    ${escapeHTML(item.title)}
-                </div>
-
-                <div class="video-description">
-                    ${escapeHTML(item.description)}
-                </div>
-
-                <div class="text-[9px] text-zinc-400 mt-3">
-                    @oneminutenews • #News
-                </div>
-
-            </div>
-
-
-            <div class="video-side">
-
-                <button
-                    onclick="likeVideo('${escapeAttribute(item.id)}')"
-                    class="video-button">
-
-                    <div
-                        id="videoLike-${escapeAttribute(item.id)}"
-                        class="video-circle">
-                        ${likedVideos[item.id]?"❤️":"♡"}
-                    </div>
-
-                    Like
-
-                </button>
-
-
-                <button
-                    onclick="openComments('video','${escapeAttribute(item.id)}')"
-                    class="video-button">
-
-                    <div class="video-circle">
-                        💬
-                    </div>
-
-                    Comment
-
-                </button>
-
-
-                <button
-                    onclick="openShareVideo('${escapeAttribute(item.id)}')"
-                    class="video-button">
-
-                    <div class="video-circle">
-                        ↗️
-                    </div>
-
-                    Share
-
-                </button>
-
-
-                <button
-                    onclick="saveVideo('${escapeAttribute(item.id)}')"
-                    class="video-button">
-
-                    <div
-                        id="videoSave-${escapeAttribute(item.id)}"
-                        class="video-circle">
-                        ${savedItems.includes("video-"+item.id)
-                            ?"🔖"
-                            :"☆"}
-                    </div>
-
-                    Save
-
-                </button>
-
-
-                <button
-                    onclick="toggleMute()"
-                    class="video-button">
-
-                    <div class="video-circle">
-                        <span id="muteIcon">
-                            🔇
-                        </span>
-                    </div>
-
-                    Sound
-
-                </button>
-
-            </div>
-
-
-            <div class="video-progress">
-
-                <div
-                    id="progress-${escapeAttribute(item.id)}"
-                    class="video-progress-bar">
-                </div>
-
-            </div>
-
-        `;
-
-
-        page.addEventListener(
-            "dblclick",
-            ()=>{
-
-                const heart=
-                    document.getElementById(
-                        "videoHeart-"+item.id
-                    );
-
-                if(heart){
-
-                    heart.innerHTML=
-                        `<div class="text-7xl heart-pop">
-                            ❤️
-                        </div>`;
-
-                    setTimeout(
-                        ()=>heart.innerHTML="",
-                        800
-                    );
-
-                }
-
-                if(!likedVideos[item.id]){
-                    likeVideo(item.id);
-                }
-
-            }
+      const image =
+        value(
+          r,
+          "thumbnail_url",
+          "cover_url",
+          "image_url",
+          "poster"
         );
 
 
-        container.appendChild(page);
+      return `
 
-    });
+        <div
+          class="reel-mini"
+          onclick="
+            showScreen('reels');
+            scrollToReel(${i});
+          ">
+
+          ${
+            video
+            ?
+
+            `<video
+              src="${esc(video)}"
+              muted
+              playsinline
+              preload="metadata"
+              poster="${esc(image)}">
+            </video>`
+
+            :
+
+            `<img
+              src="${esc(
+                image ||
+                "https://via.placeholder.com/150x220"
+              )}"
+              loading="lazy">`
+
+          }
+
+          <div class="reel-mini-overlay">
+            ${esc(
+              value(
+                r,
+                "title",
+                "caption",
+                "description"
+              )
+            )}
+          </div>
+
+        </div>
+
+      `;
+
+    }).join("");
 
 
-    setupVideoObserver();
+  /* =======================================================
+     FULL REEL FEED
+  ======================================================= */
 
-}
+  feed.innerHTML =
+    list.map((r,i) => {
 
+      const id =
+        value(r,"id");
 
-/* =====================================================
-   VIDEO OBSERVER
-===================================================== */
+      const isLiked =
+        likedItems.has(
+          `reel_${id}`
+        );
 
-let videoObserver=null;
+      const video =
+        value(
+          r,
+          "video_url",
+          "reel_url",
+          "media_url",
+          "video"
+        );
 
-function setupVideoObserver(){
+      const image =
+        value(
+          r,
+          "thumbnail_url",
+          "cover_url",
+          "image_url",
+          "poster"
+        );
 
-    if(videoObserver){
-        videoObserver.disconnect();
-    }
+      const title =
+        value(
+          r,
+          "title",
+          "caption"
+        );
 
-    videoObserver=
-        new IntersectionObserver(
-            entries=>{
-
-                entries.forEach(entry=>{
-
-                    const video=
-                        entry.target.querySelector(
-                            "video"
-                        );
-
-                    if(!video)return;
-
-                    if(entry.isIntersecting){
-
-                        video.muted=muted;
-
-                        video.play().catch(()=>{});
-
-                    }else{
-
-                        video.pause();
-
-                    }
-
-                });
-
-            },
-            {
-                threshold:.65
-            }
+      const description =
+        value(
+          r,
+          "description",
+          "details"
         );
 
 
-    document
-        .querySelectorAll(".video-page")
-        .forEach(page=>
-            videoObserver.observe(page)
-        );
+      return `
 
+        <div
+          class="reel-slide"
+          id="reel-slide-${i}">
 
-    document
-        .querySelectorAll(".video")
-        .forEach(video=>{
+          ${
+            video
 
-            video.addEventListener(
-                "timeupdate",
-                ()=>{
+            ?
 
-                    const id=
-                        video.id.replace(
-                            "video-",
-                            ""
-                        );
+            `<video
+              class="reel-video"
+              src="${esc(video)}"
+              muted
+              autoplay
+              loop
+              playsinline
+              preload="auto"
+              poster="${esc(image)}"
+              onclick="
+                event.stopPropagation();
+                this.paused
+                  ? playReelVideo(this)
+                  : pauseReelVideo(this);
+              ">
+            </video>`
 
-                    const bar=
-                        document.getElementById(
-                            "progress-"+id
-                        );
+            :
 
-                    if(
-                        bar &&
-                        video.duration &&
-                        Number.isFinite(video.duration)
-                    ){
+            `<img
+              class="reel-video"
+              src="${esc(image)}"
+              loading="lazy">`
 
-                        bar.style.width=
-                            (
-                                video.currentTime /
-                                video.duration *
-                                100
-                            )+"%";
+          }
 
-                    }
 
-                }
-            );
+          <div class="reel-gradient"></div>
 
-        });
 
-}
+          <div class="reel-info">
 
+            <h3>
+              ${esc(title)}
+            </h3>
 
-/* =====================================================
-   NEWS / VIDEO SWITCH
-===================================================== */
+            <p>
+              ${esc(description)}
+            </p>
 
-function showNews(){
+          </div>
 
-    document
-        .getElementById("newsScreen")
-        .classList.remove("hidden");
 
-    document
-        .getElementById("videoScreen")
-        .classList.add("hidden");
-
-    document
-        .getElementById("newsTab")
-        .className="mode-active";
-
-    document
-        .getElementById("videoTab")
-        .className="mode-inactive";
-
-    activateNav("feedNav");
-
-}
-
-
-function showVideos(){
-
-    document
-        .getElementById("newsScreen")
-        .classList.add("hidden");
-
-    document
-        .getElementById("videoScreen")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("newsTab")
-        .className="mode-inactive";
-
-    document
-        .getElementById("videoTab")
-        .className="mode-active";
-
-    activateNav("exploreNav");
-
-    setTimeout(
-        setupVideoObserver,
-        100
-    );
-
-}
-
-
-/* =====================================================
-   CATEGORY
-===================================================== */
-
-function setCategory(category){
-
-    currentCategory=category;
-
-    document
-        .querySelectorAll(".category")
-        .forEach(btn=>
-            btn.classList.remove("active")
-        );
-
-    const selected=
-        document.querySelector(
-            `[data-category="${category}"]`
-        );
-
-    if(selected){
-        selected.classList.add("active");
-    }
-
-    renderNews();
-
-    showNews();
-
-    document
-        .getElementById("newsScreen")
-        .scrollTop=0;
-
-}
-
-
-/* =====================================================
-   LIKE NEWS
-===================================================== */
-
-async function likeNews(id){
-
-    const item=
-        newsData.find(
-            x=>String(x.id)===String(id)
-        );
-
-    if(!item)return;
-
-    const newState=
-        !likedNews[id];
-
-    likedNews[id]=newState;
-
-    localStorage.setItem(
-        "oneMinuteLikedNews",
-        JSON.stringify(likedNews)
-    );
-
-
-    item.likes=
-        Math.max(
-            0,
-            Number(item.likes || 0)
-            +(newState?1:-1)
-        );
-
-
-    renderNews();
-
-
-    if(isUUID(id)){
-
-        try{
-
-            const {error}=
-                await supabaseClient.rpc(
-                    "increment_news_likes",
-                    {
-                        p_news_id:id,
-                        p_delta:newState?1:-1
-                    }
-                );
-
-            if(error){
-
-                console.error(
-                    "Like RPC error:",
-                    error
-                );
-
-            }
-
-        }catch(error){
-
-            console.error(error);
-
-        }
-
-    }
-
-}
-
-
-/* =====================================================
-   LIKE VIDEO
-===================================================== */
-
-function likeVideo(id){
-
-    likedVideos[id]=
-        !likedVideos[id];
-
-    localStorage.setItem(
-        "oneMinuteLikedVideos",
-        JSON.stringify(likedVideos)
-    );
-
-
-    const button=
-        document.getElementById(
-            "videoLike-"+id
-        );
-
-    if(button){
-
-        button.innerText=
-            likedVideos[id]
-            ?"❤️"
-            :"♡";
-
-        button.style.background=
-            likedVideos[id]
-            ?"rgba(220,38,38,.9)"
-            :"rgba(0,0,0,.62)";
-
-    }
-
-}
-
-
-/* =====================================================
-   SAVE NEWS
-===================================================== */
-
-function saveNews(id){
-
-    const key="news-"+id;
-
-    if(savedItems.includes(key)){
-
-        savedItems=
-            savedItems.filter(
-                x=>x!==key
-            );
-
-    }else{
-
-        savedItems.push(key);
-
-    }
-
-    localStorage.setItem(
-        "oneMinuteSaved",
-        JSON.stringify(savedItems)
-    );
-
-    renderNews();
-
-}
-
-
-/* =====================================================
-   SAVE VIDEO
-===================================================== */
-
-function saveVideo(id){
-
-    const key="video-"+id;
-
-    if(savedItems.includes(key)){
-
-        savedItems=
-            savedItems.filter(
-                x=>x!==key
-            );
-
-    }else{
-
-        savedItems.push(key);
-
-    }
-
-    localStorage.setItem(
-        "oneMinuteSaved",
-        JSON.stringify(savedItems)
-    );
-
-
-    const icon=
-        document.getElementById(
-            "videoSave-"+id
-        );
-
-    if(icon){
-
-        icon.innerText=
-            savedItems.includes(key)
-            ?"🔖"
-            :"☆";
-
-    }
-
-}
-
-
-/* =====================================================
-   NEWS VOICE
-===================================================== */
-
-function speakNews(id){
-
-    const item=
-        newsData.find(
-            x=>String(x.id)===String(id)
-        );
-
-    if(!item)return;
-
-
-    if(!("speechSynthesis" in window)){
-
-        alert(
-            "Voice is not supported on this device/browser."
-        );
-
-        return;
-
-    }
-
-
-    speechSynthesis.cancel();
-
-
-    const text=
-        item.tag+
-        ". "+
-        item.title+
-        ". "+
-        item.description;
-
-
-    const speech=
-        new SpeechSynthesisUtterance(text);
-
-    speech.lang="en-IN";
-    speech.rate=.92;
-    speech.pitch=1;
-
-
-    const voices=
-        speechSynthesis.getVoices();
-
-    const indianVoice=
-        voices.find(
-            voice=>
-                voice.lang &&
-                voice.lang
-                    .toLowerCase()
-                    .includes("en-in")
-        );
-
-    if(indianVoice){
-        speech.voice=indianVoice;
-    }
-
-
-    speechSynthesis.speak(speech);
-
-}
-
-
-/* =====================================================
-   VIDEO CONTROLS
-===================================================== */
-
-function toggleVideo(id){
-
-    const video=
-        document.getElementById(
-            "video-"+id
-        );
-
-    if(!video)return;
-
-
-    if(video.paused){
-
-        video.play().catch(()=>{});
-
-    }else{
-
-        video.pause();
-
-    }
-
-}
-
-
-function toggleMute(){
-
-    muted=!muted;
-
-    document
-        .querySelectorAll(".video")
-        .forEach(video=>{
-            video.muted=muted;
-        });
-
-
-    const icon=
-        document.getElementById(
-            "muteIcon"
-        );
-
-    if(icon){
-
-        icon.innerText=
-            muted
-            ?"🔇"
-            :"🔊";
-
-    }
-
-}
-
-
-/* =====================================================
-   SEARCH
-===================================================== */
-
-function openSearch(){
-
-    document
-        .getElementById("searchModal")
-        .classList.remove("hidden");
-
-    setTimeout(
-        ()=>{
-            document
-                .getElementById("searchInput")
-                .focus();
-        },
-        100
-    );
-
-}
-
-
-function closeSearch(){
-
-    document
-        .getElementById("searchModal")
-        .classList.add("hidden");
-
-    document
-        .getElementById("searchInput")
-        .value="";
-
-    document
-        .getElementById("searchResults")
-        .innerHTML="";
-
-}
-
-
-function searchNews(value){
-
-    const results=
-        document.getElementById(
-            "searchResults"
-        );
-
-    const q=
-        value.trim().toLowerCase();
-
-    if(!q){
-
-        results.innerHTML="";
-        return;
-
-    }
-
-
-    const matches=
-        newsData.filter(
-            item=>
-                item.title.toLowerCase().includes(q) ||
-                item.description.toLowerCase().includes(q) ||
-                item.category.toLowerCase().includes(q) ||
-                item.tag.toLowerCase().includes(q)
-        );
-
-
-    if(!matches.length){
-
-        results.innerHTML=`
-
-            <div class="text-center
-            text-zinc-600 text-xs mt-10">
-                No news found
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    results.innerHTML=
-        matches.map(item=>`
+          <div class="reel-actions">
 
             <button
-                onclick="openSearchNews('${escapeAttribute(item.id)}')"
-                class="search-result">
+              class="reel-action ${isLiked ? "liked" : ""}"
+              onclick="
+                event.stopPropagation();
+                toggleLike('reel_${id}',this);
+              ">
 
-                <div class="text-[8px]
-                text-red-500 font-black">
-                    ${escapeHTML(item.tag)}
-                </div>
+              <span>
+                ❤️
+              </span>
 
-                <div class="text-sm
-                font-bold mt-1">
-                    ${escapeHTML(item.title)}
-                </div>
-
-                <div class="text-[9px]
-                text-zinc-500 mt-1">
-                    ${escapeHTML(item.time)}
-                </div>
+              <span>
+                Like
+              </span>
 
             </button>
 
-        `).join("");
 
-}
+            <button
+              class="reel-action"
+              onclick="
+                event.stopPropagation();
+                openComments('reel_${id}');
+              ">
 
+              <span>
+                💬
+              </span>
 
-function openSearchNews(id){
+              <span>
+                Comment
+              </span>
 
-    closeSearch();
+            </button>
 
-    showNews();
 
-    setTimeout(()=>{
+            <button
+              class="reel-action"
+              onclick="
+                event.stopPropagation();
+                openShare('${esc(title)}');
+              ">
 
-        const element=
-            document.getElementById(
-                "news-"+CSS.escape(String(id))
-            );
+              <span>
+                📤
+              </span>
 
-        if(element){
+              <span>
+                Share
+              </span>
 
-            element.scrollIntoView({
-                behavior:"smooth",
-                block:"center"
-            });
+            </button>
 
-        }
+          </div>
 
-    },100);
-
-}
-
-
-/* =====================================================
-   TRENDING
-===================================================== */
-
-function openTrending(id){
-
-    const item=
-        trendingData.find(
-            x=>String(x.id)===String(id)
-        );
-
-    if(!item)return;
-
-
-    alert(
-        "🔥 TRENDING\n\n"+
-        item.title
-    );
-
-}
-
-
-function goTrending(){
-
-    showNews();
-
-    activateNav("trendingNav");
-
-    currentCategory="all";
-
-    document
-        .querySelectorAll(".category")
-        .forEach(x=>
-            x.classList.remove("active")
-        );
-
-    document
-        .querySelector(
-            '[data-category="all"]'
-        )
-        .classList.add("active");
-
-
-    renderNews();
-
-
-    setTimeout(()=>{
-
-        const section=
-            document.querySelector(
-                ".trending"
-            );
-
-        if(section){
-
-            section.scrollIntoView({
-                behavior:"smooth"
-            });
-
-        }
-
-    },100);
-
-}
-
-
-/* =====================================================
-   SAVED
-===================================================== */
-
-function showSaved(){
-
-    activateNav("savedNav");
-
-
-    if(!savedItems.length){
-
-        alert(
-            "🔖 No saved news yet."
-        );
-
-        return;
-
-    }
-
-
-    const savedNews=
-        savedItems
-            .filter(
-                x=>x.startsWith("news-")
-            )
-            .map(
-                x=>x.substring(5)
-            );
-
-
-    if(!savedNews.length){
-
-        alert(
-            "🔖 Saved videos: "+
-            savedItems.filter(
-                x=>x.startsWith("video-")
-            ).length
-        );
-
-        return;
-
-    }
-
-
-    showNews();
-
-    currentCategory="all";
-
-    renderNews();
-
-
-    setTimeout(()=>{
-
-        const first=
-            document.getElementById(
-                "news-"+CSS.escape(
-                    String(savedNews[0])
-                )
-            );
-
-        if(first){
-
-            first.scrollIntoView({
-                behavior:"smooth"
-            });
-
-        }
-
-    },100);
-
-}
-
-
-/* =====================================================
-   BOTTOM NAV
-===================================================== */
-
-function goFeed(){
-
-    activateNav("feedNav");
-
-    showNews();
-
-}
-
-
-function goVideos(){
-
-    activateNav("exploreNav");
-
-    showVideos();
-
-}
-
-
-function activateNav(id){
-
-    document
-        .querySelectorAll(".nav-button")
-        .forEach(btn=>
-            btn.classList.remove("active")
-        );
-
-    const btn=
-        document.getElementById(id);
-
-    if(btn){
-        btn.classList.add("active");
-    }
-
-}
-
-
-/* =====================================================
-   COMMENTS
-===================================================== */
-
-async function openComments(type,id){
-
-    currentCommentNewsId=
-        type==="news"
-        ?id
-        :null;
-
-    currentCommentVideoId=
-        type==="video"
-        ?id
-        :null;
-
-
-    document
-        .getElementById("commentsPanel")
-        .classList.add("open");
-
-
-    await loadComments();
-
-}
-
-
-function closeComments(){
-
-    document
-        .getElementById("commentsPanel")
-        .classList.remove("open");
-
-}
-
-
-async function loadComments(){
-
-    const list=
-        document.getElementById(
-            "commentList"
-        );
-
-    list.innerHTML=`
-
-        <div class="text-center
-        text-zinc-600 text-xs">
-            Loading comments...
         </div>
 
-    `;
+      `;
+
+    }).join("");
 
 
-    try{
+  /*
+    Start automatic reel playback.
+  */
 
-        let query=
-            supabaseClient
-                .from("comments")
-                .select(
-                    "id,user_name,text,created_at"
-                )
-                .eq("approved",true)
-                .order(
-                    "created_at",
-                    {ascending:true}
-                )
-                .limit(100);
+  setTimeout(() => {
+
+    setupReelAutoplay();
+
+  },100);
+
+}
 
 
-        if(currentCommentNewsId){
+/* =========================================================
+   SCROLL TO REEL
+========================================================= */
 
-            query=
-                query.eq(
-                    "news_id",
-                    currentCommentNewsId
-                );
+function scrollToReel(index){
 
-        }else if(currentCommentVideoId){
+  setTimeout(() => {
 
-            query=
-                query.eq(
-                    "video_id",
-                    currentCommentVideoId
-                );
+    const el =
+      document.getElementById(
+        `reel-slide-${index}`
+      );
 
-        }else{
+    if(el){
 
-            list.innerHTML=`
-                <div class="text-center
-                text-zinc-600 text-xs">
-                    Select a news item first.
-                </div>
-            `;
+      el.scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+      });
 
-            return;
+      setTimeout(() => {
 
-        }
+        setupReelAutoplay();
 
+      },500);
 
-        const {data,error}=
-            await query;
+    }
 
+  },100);
 
-        if(error){
-
-            console.error(
-                "Comments load error:",
-                error
-            );
-
-            list.innerHTML=`
-                <div class="text-center
-                text-zinc-600 text-xs">
-                    Comments unavailable.
-                </div>
-            `;
-
-            return;
-
-        }
+}
 
 
-        if(!data || !data.length){
+/* =========================================================
+   TRENDING
+========================================================= */
 
-            list.innerHTML=`
-                <div class="text-center
-                text-zinc-600 text-xs py-8">
-                    No approved comments yet.
-                </div>
-            `;
+function renderTrending(){
 
-            return;
+  const container =
+    document.getElementById(
+      "trendingList"
+    );
 
-        }
-
-
-        list.innerHTML=
-            data.map(comment=>`
-
-                <div class="flex gap-2 mb-4">
-
-                    <div class="w-8 h-8 rounded-full
-                    bg-red-600 flex items-center
-                    justify-center text-xs font-bold">
-                        ${escapeHTML(
-                            (
-                                comment.user_name ||
-                                "A"
-                            )
-                            .charAt(0)
-                            .toUpperCase()
-                        )}
-                    </div>
-
-                    <div>
-
-                        <b class="text-xs">
-                            ${escapeHTML(
-                                comment.user_name ||
-                                "Anonymous"
-                            )}
-                        </b>
-
-                        <p class="text-[10px]
-                        text-zinc-500">
-                            ${escapeHTML(
-                                comment.text
-                            )}
-                        </p>
-
-                    </div>
-
-                </div>
-
-            `).join("");
+  const list =
+    newsData.slice(0,5);
 
 
-    }catch(error){
+  if(!list.length){
 
-        console.error(error);
+    container.innerHTML =
+      `<div class="loading">
+        No trending news.
+      </div>`;
 
-        list.innerHTML=`
-            <div class="text-center
-            text-zinc-600 text-xs">
-                Comments unavailable.
+    return;
+
+  }
+
+
+  container.innerHTML =
+    list.map((item,index) => `
+
+      <div
+        class="trending-item"
+        onclick="showScreen('news')">
+
+        <div class="rank">
+          #${index + 1}
+        </div>
+
+        <div class="trending-title">
+          ${esc(
+            value(
+              item,
+              "title"
+            )
+          )}
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+/* =========================================================
+   LIKE
+========================================================= */
+
+function toggleLike(key,btn){
+
+  if(likedItems.has(key)){
+
+    likedItems.delete(key);
+
+    btn.classList.remove(
+      "liked"
+    );
+
+    showToast(
+      "Unliked"
+    );
+
+  }else{
+
+    likedItems.add(key);
+
+    btn.classList.add(
+      "liked"
+    );
+
+    showToast(
+      "Liked!"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   COMMENTS
+========================================================= */
+
+function openComments(targetKey){
+
+  currentCommentTarget =
+    targetKey;
+
+  renderComments();
+
+  document
+    .getElementById(
+      "commentsModal"
+    )
+    .classList.add("show");
+
+}
+
+
+function renderComments(){
+
+  const list =
+    commentsStore[
+      currentCommentTarget
+    ]
+    ||
+    [];
+
+  const container =
+    document.getElementById(
+      "commentList"
+    );
+
+
+  if(!list.length){
+
+    container.innerHTML =
+      `<div style="
+        text-align:center;
+        color:var(--muted);
+        font-size:12px;
+        padding:10px;">
+        No comments yet. Be the first!
+      </div>`;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    list.map(c => `
+
+      <div class="comment">
+
+        <div class="comment-name">
+          User
+        </div>
+
+        <div class="comment-text">
+          ${esc(c)}
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function submitComment(){
+
+  const input =
+    document.getElementById(
+      "commentInput"
+    );
+
+  const text =
+    input.value.trim();
+
+  if(!text) return;
+
+
+  if(
+    !commentsStore[
+      currentCommentTarget
+    ]
+  ){
+
+    commentsStore[
+      currentCommentTarget
+    ] = [];
+
+  }
+
+
+  commentsStore[
+    currentCommentTarget
+  ].push(text);
+
+
+  input.value = "";
+
+  renderComments();
+
+  showToast(
+    "Comment posted!"
+  );
+
+}
+
+
+/* =========================================================
+   SHARE
+========================================================= */
+
+function openShare(title){
+
+  currentShareData = {
+    title:title
+  };
+
+  document
+    .getElementById(
+      "shareModal"
+    )
+    .classList.add("show");
+
+}
+
+
+/* =========================================================
+   BUSINESSES
+========================================================= */
+
+async function loadBusinesses(){
+
+  try{
+
+    const {data,error} =
+      await supabaseClient
+        .from("businesses")
+        .select("*")
+        .order(
+          "created_at",
+          {
+            ascending:false
+          }
+        );
+
+
+    if(error)
+      throw error;
+
+
+    businessData =
+      data || [];
+
+
+    populateFilters();
+
+    applyBusinessFilters();
+
+
+  }catch(err){
+
+    console.error(err);
+
+    document
+      .getElementById(
+        "businessContent"
+      )
+      .innerHTML =
+      `<div class="loading">
+        Failed to load business data.
+      </div>`;
+
+  }
+
+}
+
+
+/* =========================================================
+   BUSINESS FILTERS
+========================================================= */
+
+function populateFilters(){
+
+  const stateSel =
+    document.getElementById(
+      "businessState"
+    );
+
+  const sectorSel =
+    document.getElementById(
+      "businessSector"
+    );
+
+
+  const indiaStates = [
+
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+
+    "Andaman and Nicobar Islands",
+    "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Jammu and Kashmir",
+    "Ladakh",
+    "Lakshadweep",
+    "Puducherry"
+
+  ];
+
+
+  const businessSectors = [
+
+    "Agriculture",
+    "Automobile",
+    "Banking",
+    "Beauty & Salon",
+    "Construction",
+    "Education",
+    "Electronics",
+    "Entertainment",
+    "Events",
+    "Fashion",
+    "Finance",
+    "Fitness & Gym",
+    "Food & Restaurant",
+    "Healthcare",
+    "Hotels & Hospitality",
+    "IT & Software",
+    "Insurance",
+    "Jewellery",
+    "Legal Services",
+    "Logistics",
+    "Manufacturing",
+    "Media & News",
+    "Medical",
+    "Real Estate",
+    "Retail",
+    "Security Services",
+    "Shopping",
+    "Sports",
+    "Telecom",
+    "Tourism & Travel",
+    "Transportation",
+    "E-Commerce",
+    "Other"
+
+  ];
+
+
+  const databaseStates =
+    businessData
+      .map(b =>
+        value(
+          b,
+          "state",
+          "region"
+        )
+      )
+      .filter(Boolean);
+
+
+  const allStates = [
+    ...indiaStates,
+    ...databaseStates
+  ];
+
+
+  const uniqueStates =
+    [
+      ...new Map(
+        allStates.map(s => [
+          String(s)
+            .trim()
+            .toLowerCase(),
+          String(s)
+            .trim()
+        ])
+      ).values()
+    ]
+    .sort(
+      (a,b) =>
+        a.localeCompare(b)
+    );
+
+
+  const databaseSectors =
+    businessData
+      .map(b =>
+        value(
+          b,
+          "category",
+          "sector",
+          "business_sector"
+        )
+      )
+      .filter(Boolean);
+
+
+  const allSectors = [
+    ...businessSectors,
+    ...databaseSectors
+  ];
+
+
+  const uniqueSectors =
+    [
+      ...new Map(
+        allSectors.map(s => [
+          String(s)
+            .trim()
+            .toLowerCase(),
+          String(s)
+            .trim()
+        ])
+      ).values()
+    ]
+    .sort(
+      (a,b) =>
+        a.localeCompare(b)
+    );
+
+
+  stateSel.innerHTML =
+    `<option value="">
+      🇮🇳 All States / UTs
+    </option>` +
+
+    uniqueStates
+      .map(state =>
+        `<option value="${esc(state)}">
+          ${esc(state)}
+        </option>`
+      )
+      .join("");
+
+
+  sectorSel.innerHTML =
+    `<option value="">
+      🏢 All Business Sectors
+    </option>` +
+
+    uniqueSectors
+      .map(sector =>
+        `<option value="${esc(sector)}">
+          ${esc(sector)}
+        </option>`
+      )
+      .join("");
+
+}
+
+
+/* =========================================================
+   BUSINESS FILTER
+========================================================= */
+
+function applyBusinessFilters(){
+
+  const q =
+    document
+      .getElementById(
+        "businessSearch"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const st =
+    document
+      .getElementById(
+        "businessState"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const sec =
+    document
+      .getElementById(
+        "businessSector"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  filteredBusinesses =
+    businessData.filter(b => {
+
+      const name =
+        String(
+          value(
+            b,
+            "name",
+            "title",
+            "business_name"
+          )
+        )
+        .toLowerCase();
+
+
+      const city =
+        String(
+          value(
+            b,
+            "city"
+          )
+        )
+        .toLowerCase();
+
+
+      const state =
+        String(
+          value(
+            b,
+            "state",
+            "region"
+          )
+        )
+        .toLowerCase();
+
+
+      const sector =
+        String(
+          value(
+            b,
+            "category",
+            "sector",
+            "business_sector"
+          )
+        )
+        .toLowerCase();
+
+
+      const description =
+        String(
+          value(
+            b,
+            "description",
+            "details"
+          )
+        )
+        .toLowerCase();
+
+
+      const matchesSearch =
+        !q ||
+        name.includes(q) ||
+        city.includes(q) ||
+        state.includes(q) ||
+        sector.includes(q) ||
+        description.includes(q);
+
+
+      const matchesState =
+        !st ||
+        state === st;
+
+
+      const matchesSector =
+        !sec ||
+        sector === sec;
+
+
+      return (
+        matchesSearch &&
+        matchesState &&
+        matchesSector
+      );
+
+    });
+
+
+  businessSlide = 0;
+
+  renderBusinessWall();
+
+  startBusinessRotation();
+
+}
+
+
+/* =========================================================
+   BUSINESS VIEW
+========================================================= */
+
+function setBusinessView(view){
+
+  businessView =
+    view;
+
+  document
+    .querySelectorAll(
+      ".wall-btn"
+    )
+    .forEach(b =>
+      b.classList.remove(
+        "active"
+      )
+    );
+
+
+  const button =
+    document.getElementById(
+      "wall-" + view
+    );
+
+
+  if(button){
+
+    button.classList.add(
+      "active"
+    );
+
+  }
+
+
+  renderBusinessWall();
+
+}
+
+
+/* =========================================================
+   BUSINESS WALL
+========================================================= */
+
+function renderBusinessWall(){
+
+  const container =
+    document.getElementById(
+      "businessContent"
+    );
+
+
+  if(!filteredBusinesses.length){
+
+    container.innerHTML =
+      `<div class="loading">
+        No business listings match your selection.
+      </div>`;
+
+    updatePageControls(0);
+
+    return;
+
+  }
+
+
+  const totalPages =
+    Math.ceil(
+      filteredBusinesses.length /
+      BUSINESSES_PER_SLIDE
+    );
+
+
+  if(
+    businessSlide >= totalPages
+  ){
+
+    businessSlide = 0;
+
+  }
+
+
+  if(
+    businessSlide < 0
+  ){
+
+    businessSlide =
+      totalPages - 1;
+
+  }
+
+
+  const pageItems =
+    filteredBusinesses.slice(
+      businessSlide *
+      BUSINESSES_PER_SLIDE,
+
+      (businessSlide + 1) *
+      BUSINESSES_PER_SLIDE
+    );
+
+
+  updatePageControls(
+    totalPages
+  );
+
+
+  /* =======================================================
+     LIVE VIEW
+  ======================================================= */
+
+  if(
+    businessView === "live"
+  ){
+
+    container.innerHTML =
+      `<div class="business-grid">` +
+
+      pageItems.map(b => {
+
+        const name =
+          value(
+            b,
+            "name",
+            "title",
+            "business_name"
+          )
+          ||
+          "Business";
+
+
+        const logo =
+          value(
+            b,
+            "logo_url",
+            "logo"
+          )
+          ||
+          "https://via.placeholder.com/100";
+
+
+        const media =
+          value(
+            b,
+            "media_url",
+            "ad_url",
+            "image_url"
+          )
+          ||
+          "https://via.placeholder.com/300x400";
+
+
+        const city =
+          value(
+            b,
+            "city",
+            "location"
+          );
+
+
+        const state =
+          value(
+            b,
+            "state",
+            "region"
+          );
+
+
+        const loc =
+          city && state
+            ? `${city}, ${state}`
+            : city || state;
+
+
+        return `
+
+          <div
+            class="business-tile"
+            onclick="openBusinessAdTV(${b.id})">
+
+            <img
+              class="business-ad"
+              src="${esc(media)}"
+              loading="lazy">
+
+            <div
+              class="business-overlay">
             </div>
+
+            <img
+              class="business-logo"
+              src="${esc(logo)}"
+              loading="lazy">
+
+            <div
+              class="business-info">
+
+              <div class="business-name">
+                ${esc(name)}
+              </div>
+
+              <div class="business-location">
+                ${esc(
+                  loc ||
+                  "Digital Presence"
+                )}
+              </div>
+
+            </div>
+
+          </div>
+
         `;
 
-    }
+      }).join("") +
 
-}
+      `</div>`;
 
+  }
 
-/* =====================================================
-   POST COMMENT
-===================================================== */
 
-async function postComment(){
+  /* =======================================================
+     LOGOS
+  ======================================================= */
 
-    const input=
-        document.getElementById(
-            "commentInput"
-        );
+  else if(
+    businessView === "logos"
+  ){
 
-    const text=
-        input.value.trim();
+    container.innerHTML =
+      `<div class="logo-wall">` +
 
-    if(!text)return;
+      pageItems.map(b => {
 
+        const logo =
+          value(
+            b,
+            "logo_url",
+            "logo"
+          )
+          ||
+          "https://via.placeholder.com/100";
 
-    if(
-        !currentCommentNewsId &&
-        !currentCommentVideoId
-    ){
 
-        alert(
-            "Please open comments from a news or video."
-        );
+        return `
 
-        return;
+          <div
+            class="logo-wall-card"
+            onclick="openBusinessAdTV(${b.id})">
 
-    }
+            <img
+              src="${esc(logo)}"
+              loading="lazy">
 
+          </div>
 
-    const button=
-        document.querySelector(
-            "#commentsPanel button.bg-red-600"
-        );
+        `;
 
+      }).join("") +
 
-    if(button){
+      `</div>`;
 
-        button.disabled=true;
-        button.innerText="...";
+  }
 
-    }
 
+  /* =======================================================
+     BUSINESS ADS
+     Automatic video playback
+  ======================================================= */
 
-    try{
+  else if(
+    businessView === "ads"
+  ){
 
-        const payload={
+    container.innerHTML =
+      `<div class="ad-wall">` +
 
-            news_id:
-                currentCommentNewsId,
+      pageItems.map(b => {
 
-            video_id:
-                currentCommentVideoId,
+        /*
+          If video_url exists,
+          ALWAYS treat it as video.
+        */
 
-            user_name:
-                "You",
+        const dedicatedVideo =
+          value(
+            b,
+            "video_url"
+          );
 
-            text:text,
 
-            approved:false
+        const media =
+          dedicatedVideo ||
+          value(
+            b,
+            "media_url",
+            "ad_url",
+            "image_url"
+          )
+          ||
+          "https://via.placeholder.com/300";
 
-        };
 
+        const name =
+          value(
+            b,
+            "name",
+            "title",
+            "business_name"
+          );
 
-        const {error}=
-            await supabaseClient
-                .from("comments")
-                .insert([payload]);
 
-
-        if(error){
-
-            console.error(
-                "Comment insert error:",
-                error
-            );
-
-            alert(
-                "Unable to post comment. Please try again."
-            );
-
-            return;
-
-        }
-
-
-        input.value="";
-
-
-        alert(
-            "Comment submitted for approval."
-        );
-
-
-        await loadComments();
-
-
-    }catch(error){
-
-        console.error(error);
-
-        alert(
-            "Unable to post comment."
-        );
-
-    }finally{
-
-        if(button){
-
-            button.disabled=false;
-            button.innerText="Post";
-
-        }
-
-    }
-
-}
-
-
-/* =====================================================
-   SHARE
-===================================================== */
-
-function openShare(id){
-
-    const item=
-        newsData.find(
-            x=>String(x.id)===String(id)
-        );
-
-    if(!item)return;
-
-
-    shareTitle=item.title;
-
-    currentShareNewsId=id;
-
-
-    document
-        .getElementById("shareModal")
-        .classList.remove("hidden");
-
-}
-
-
-function openShareVideo(id){
-
-    const item=
-        videoData.find(
-            x=>String(x.id)===String(id)
-        );
-
-    if(!item)return;
-
-
-    shareTitle=item.title;
-
-    currentShareNewsId=null;
-
-
-    document
-        .getElementById("shareModal")
-        .classList.remove("hidden");
-
-}
-
-
-function closeShare(){
-
-    document
-        .getElementById("shareModal")
-        .classList.add("hidden");
-
-}
-
-
-async function shareWhatsApp(){
-
-    await registerShare();
-
-    const url=
-        "https://wa.me/?text="+
-        encodeURIComponent(
-            shareTitle+
-            " — One Minute News"
-        );
-
-    window.open(
-        url,
-        "_blank"
-    );
-
-}
-
-
-async function shareTelegram(){
-
-    await registerShare();
-
-    const url=
-        "https://t.me/share/url?url="+
-        encodeURIComponent(
-            location.href
-        )+
-        "&text="+
-        encodeURIComponent(
-            shareTitle
-        );
-
-    window.open(
-        url,
-        "_blank"
-    );
-
-}
-
-
-async function copyShare(){
-
-    await registerShare();
-
-    const text=
-        location.href+
-        " — "+
-        shareTitle;
-
-
-    if(navigator.clipboard){
-
-        try{
-
-            await navigator.clipboard.writeText(text);
-
-            alert("Link copied!");
-
-        }catch(error){
-
-            fallbackCopy(text);
-
-        }
-
-    }else{
-
-        fallbackCopy(text);
-
-    }
-
-}
-
-
-async function nativeShare(){
-
-    await registerShare();
-
-    if(navigator.share){
-
-        try{
-
-            await navigator.share({
-
-                title:"One Minute News",
-
-                text:shareTitle,
-
-                url:location.href
-
-            });
-
-        }catch(e){}
-
-    }else{
-
-        copyShare();
-
-    }
-
-}
-
-
-/* =====================================================
-   REGISTER SHARE
-===================================================== */
-
-async function registerShare(){
-
-    const id=currentShareNewsId;
-
-    if(!id)return;
-
-    const item=
-        newsData.find(
-            x=>String(x.id)===String(id)
-        );
-
-    if(item){
-
-        item.shares=
-            Number(item.shares || 0)+1;
-
-    }
-
-
-    if(isUUID(id)){
-
-        try{
-
-            const {error}=
-                await supabaseClient.rpc(
-                    "increment_news_shares",
-                    {
-                        p_news_id:id
-                    }
-                );
-
-            if(error){
-
-                console.error(
-                    "Share RPC error:",
-                    error
-                );
+        const isVideo =
+          !!dedicatedVideo ||
+          isVideoMedia(
+            media,
+            b
+          );
+
+
+        return `
+
+          <div
+            class="ad-wall-card"
+            onclick="openBusinessAdTV(${b.id})">
+
+            ${
+              isVideo
+
+              ?
+
+              `<video
+                src="${esc(media)}"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="auto"
+                webkit-playsinline>
+              </video>`
+
+              :
+
+              `<img
+                src="${esc(media)}"
+                loading="lazy"
+                alt="${esc(name)}">`
 
             }
 
-        }catch(error){
+            <div class="ad-wall-tag">
+              ${esc(name)}
+            </div>
 
-            console.error(error);
+          </div>
+
+        `;
+
+      }).join("") +
+
+      `</div>`;
+
+
+    /*
+      ROBUST BUSINESS AD AUTOPLAY
+      - muted autoplay for browser compatibility
+      - retry after media becomes playable
+      - pause when page is hidden
+      - resume when page becomes visible
+    */
+    setTimeout(setupBusinessAdVideos, 50);
+
+  }
+
+}
+
+
+/* =========================================================
+   BUSINESS AD VIDEO ENGINE
+========================================================= */
+
+function setupBusinessAdVideos(){
+  const videos = document.querySelectorAll(
+    "#businessContent .ad-wall-card video"
+  );
+
+  videos.forEach(video => {
+    video.muted = true;
+    video.defaultMuted = true;
+    video.autoplay = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = "auto";
+
+    video.setAttribute("muted", "");
+    video.setAttribute("autoplay", "");
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+    video.setAttribute("preload", "auto");
+
+    const tryPlay = () => {
+      if(document.hidden) return;
+      video.muted = true;
+      video.defaultMuted = true;
+      const promise = video.play();
+      if(promise && typeof promise.catch === "function") promise.catch(() => {});
+    };
+
+    video.addEventListener("loadedmetadata", tryPlay, {once:true});
+    video.addEventListener("loadeddata", tryPlay, {once:true});
+    video.addEventListener("canplay", tryPlay, {once:true});
+    video.addEventListener("error", () => setTimeout(tryPlay, 500));
+    tryPlay();
+  });
+}
+
+let businessVisibilityHandlerInstalled = false;
+function installBusinessVideoVisibilityHandler(){
+  if(businessVisibilityHandlerInstalled) return;
+  businessVisibilityHandlerInstalled = true;
+  document.addEventListener("visibilitychange", () => {
+    document.querySelectorAll("#businessContent .ad-wall-card video").forEach(video => {
+      if(document.hidden){
+        video.pause();
+      }else{
+        video.muted = true;
+        const promise = video.play();
+        if(promise && typeof promise.catch === "function") promise.catch(() => {});
+      }
+    });
+  });
+}
+installBusinessVideoVisibilityHandler();
+
+
+/* =========================================================
+   BUSINESS PAGE CONTROLS
+========================================================= */
+
+function updatePageControls(totalPages){
+
+  const text =
+    document.getElementById(
+      "businessPageText"
+    );
+
+
+  const prev =
+    document.getElementById(
+      "businessPrev"
+    );
+
+
+  const next =
+    document.getElementById(
+      "businessNext"
+    );
+
+
+  if(text){
+
+    text.textContent =
+      `Showing ${
+        Math.min(
+          BUSINESSES_PER_SLIDE,
+          filteredBusinesses.length
+        )
+      } Featured Businesses`;
+
+  }
+
+
+  if(prev){
+
+    prev.disabled =
+      totalPages <= 1;
+
+  }
+
+
+  if(next){
+
+    next.disabled =
+      totalPages <= 1;
+
+  }
+
+}
+
+
+/* =========================================================
+   BUSINESS ROTATION
+========================================================= */
+
+function startBusinessRotation(){
+
+  stopBusinessRotation();
+
+  if(
+    businessPaused
+  ) return;
+
+
+  const fill =
+    document.getElementById(
+      "businessTimerFill"
+    );
+
+
+  if(fill){
+
+    fill.style.transition =
+      "none";
+
+    fill.style.transform =
+      "scaleX(1)";
+
+
+    setTimeout(() => {
+
+      fill.style.transition =
+        `transform ${BUSINESS_SLIDE_MS}ms linear`;
+
+      fill.style.transform =
+        "scaleX(0)";
+
+    },50);
+
+  }
+
+
+  businessTimer =
+    setTimeout(() => {
+
+      nextBusinessSlide();
+
+    },BUSINESS_SLIDE_MS);
+
+}
+
+
+function stopBusinessRotation(){
+
+  clearTimeout(
+    businessTimer
+  );
+
+
+  const fill =
+    document.getElementById(
+      "businessTimerFill"
+    );
+
+
+  if(fill){
+
+    fill.style.transition =
+      "none";
+
+    fill.style.transform =
+      "scaleX(1)";
+
+  }
+
+}
+
+
+function toggleBusinessPause(){
+
+  businessPaused =
+    !businessPaused;
+
+
+  const btn =
+    document.getElementById(
+      "businessPause"
+    );
+
+
+  if(businessPaused){
+
+    if(btn){
+
+      btn.textContent =
+        "▶ Play";
+
+    }
+
+    stopBusinessRotation();
+
+  }else{
+
+    if(btn){
+
+      btn.textContent =
+        "⏸ Pause";
+
+    }
+
+    startBusinessRotation();
+
+  }
+
+}
+
+
+function nextBusinessSlide(){
+
+  const totalPages =
+    Math.ceil(
+      filteredBusinesses.length /
+      BUSINESSES_PER_SLIDE
+    );
+
+
+  if(totalPages <= 1){
+
+    startBusinessRotation();
+
+    return;
+
+  }
+
+
+  businessSlide =
+    (
+      businessSlide + 1
+    ) %
+    totalPages;
+
+
+  renderBusinessWall();
+
+  startBusinessRotation();
+
+}
+
+
+function previousBusinessSlide(){
+
+  const totalPages =
+    Math.ceil(
+      filteredBusinesses.length /
+      BUSINESSES_PER_SLIDE
+    );
+
+
+  if(totalPages <= 1)
+    return;
+
+
+  businessSlide =
+    (
+      businessSlide -
+      1 +
+      totalPages
+    ) %
+    totalPages;
+
+
+  renderBusinessWall();
+
+  startBusinessRotation();
+
+}
+
+
+/* =========================================================
+   BUSINESS TV MODAL
+========================================================= */
+
+function openBusinessAdTV(id){
+
+  const item =
+    businessData.find(
+      b =>
+        String(b.id) ===
+        String(id)
+    );
+
+
+  if(!item) return;
+
+
+  currentShareData =
+    item;
+
+
+  const stage =
+    document.getElementById(
+      "tvStage"
+    );
+
+
+  /*
+    Dedicated video_url gets priority.
+  */
+
+  const dedicatedVideo =
+    value(
+      item,
+      "video_url"
+    );
+
+
+  const mediaUrl =
+    dedicatedVideo ||
+    value(
+      item,
+      "media_url",
+      "ad_url",
+      "image_url"
+    );
+
+
+  const isVideo =
+    !!dedicatedVideo ||
+    isVideoMedia(
+      mediaUrl,
+      item
+    );
+
+
+  stage
+    .querySelector(
+      ".tv-media"
+    )
+    ?.remove();
+
+
+  if(isVideo){
+
+    stage.insertAdjacentHTML(
+      "afterbegin",
+      `<video
+        class="tv-media"
+        src="${esc(mediaUrl)}"
+        autoplay
+        loop
+        muted
+        playsinline
+        webkit-playsinline
+        preload="auto">
+      </video>`
+    );
+
+
+    setTimeout(() => {
+
+      const video =
+        stage.querySelector(
+          ".tv-media"
+        );
+
+
+      if(video){
+
+        video.muted = true;
+        video.defaultMuted = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.playsInline = true;
+
+        video.setAttribute(
+          "muted",
+          ""
+        );
+
+        video.setAttribute(
+          "autoplay",
+          ""
+        );
+
+        video.setAttribute(
+          "playsinline",
+          ""
+        );
+
+        video.setAttribute(
+          "webkit-playsinline",
+          ""
+        );
+
+
+        const p =
+          video.play();
+
+
+        if(
+          p &&
+          typeof p.catch === "function"
+        ){
+
+          p.catch(() => {});
 
         }
 
-    }
+      }
 
-}
+    },50);
 
+  }else{
 
-function fallbackCopy(text){
-
-    const textarea=
-        document.createElement("textarea");
-
-    textarea.value=text;
-
-    textarea.style.position="fixed";
-    textarea.style.opacity="0";
-
-    document.body.appendChild(
-        textarea
+    stage.insertAdjacentHTML(
+      "afterbegin",
+      `<img
+        class="tv-media"
+        src="${esc(
+          mediaUrl ||
+          "https://via.placeholder.com/800x400"
+        )}">`
     );
 
-    textarea.select();
-
-    try{
-
-        document.execCommand("copy");
-
-        alert("Link copied!");
-
-    }catch(error){
-
-        alert(
-            "Copy is not supported."
-        );
-
-    }
-
-    textarea.remove();
-
-}
+  }
 
 
-/* =====================================================
-   BREAKING NEWS ROTATION
-===================================================== */
-
-const breakingNews=[
-
-    "Markets remain active as investors track the latest economic developments.",
-
-    "Major cricket update becomes one of today's most discussed sports stories.",
-
-    "New AI technology attracts attention from students and professionals.",
-
-    "Latest cinema release creates huge social media buzz.",
-
-    "Important national developments remain in focus today."
-
-];
-
-let breakingIndex=0;
+  document
+    .getElementById(
+      "tvLogo"
+    )
+    .src =
+    value(
+      item,
+      "logo_url",
+      "logo"
+    )
+    ||
+    "https://via.placeholder.com/100";
 
 
-setInterval(()=>{
-
-    breakingIndex=
-        (breakingIndex+1)%
-        breakingNews.length;
-
-
-    const element=
-        document.getElementById(
-            "breakingText"
-        );
-
-    if(element){
-
-        element.innerText=
-            breakingNews[breakingIndex];
-
-    }
-
-},5000);
+  document
+    .getElementById(
+      "tvName"
+    )
+    .textContent =
+    value(
+      item,
+      "name",
+      "title",
+      "business_name"
+    )
+    ||
+    "Featured Partner";
 
 
-/* =====================================================
-   HELPERS
-===================================================== */
-
-function formatNumber(number){
-
-    number=Number(number || 0);
-
-
-    if(number>=1000000){
-
-        return (
-            number/1000000
-        ).toFixed(1)+"M";
-
-    }
+  document
+    .getElementById(
+      "tvSector"
+    )
+    .textContent =
+    value(
+      item,
+      "category",
+      "sector",
+      "business_sector"
+    )
+    ||
+    "Commercial Business";
 
 
-    if(number>=1000){
-
-        return (
-            number/1000
-        ).toFixed(1)+"K";
-
-    }
-
-
-    return number;
-
-}
-
-
-function formatTime(dateValue){
-
-    if(!dateValue){
-        return "Just now";
-    }
+  document
+    .getElementById(
+      "tvDesc"
+    )
+    .textContent =
+    value(
+      item,
+      "description",
+      "details"
+    )
+    ||
+    "Premium verified business partner on MILLIONPIXEL Digital Business Wall.";
 
 
-    const date=
-        new Date(dateValue);
+  const city =
+    value(
+      item,
+      "city"
+    );
 
-    if(
-        Number.isNaN(
-            date.getTime()
+
+  const state =
+    value(
+      item,
+      "state",
+      "region"
+    );
+
+
+  document
+    .getElementById(
+      "tvLocation"
+    )
+    .textContent =
+    city && state
+      ? `${city}, ${state}`
+      : city ||
+        state ||
+        "Global";
+
+
+  const phone =
+    value(
+      item,
+      "phone",
+      "contact",
+      "mobile"
+    );
+
+
+  document
+    .getElementById(
+      "tvPhone"
+    )
+    .textContent =
+    phone ||
+    "Available on request";
+
+
+  const web =
+    value(
+      item,
+      "website",
+      "link"
+    );
+
+
+  document
+    .getElementById(
+      "tvWebsite"
+    )
+    .textContent =
+    web
+      ? web.replace(
+          /^https?:\/\//,
+          ""
         )
-    ){
-
-        return "Just now";
-
-    }
+      : "Official Partner";
 
 
-    const diff=
-        Date.now()-
-        date.getTime();
+  const callBtn =
+    document.getElementById(
+      "tvCallLink"
+    );
 
 
-    const seconds=
-        Math.floor(
-            diff/1000
-        );
+  if(phone){
+
+    callBtn.href =
+      "tel:" + phone;
+
+    callBtn.style.display =
+      "flex";
+
+  }else if(web){
+
+    callBtn.href =
+      web.startsWith("http")
+        ? web
+        : "https://" + web;
+
+    callBtn.style.display =
+      "flex";
+
+  }else{
+
+    callBtn.style.display =
+      "none";
+
+  }
 
 
-    if(seconds<60){
-
-        return "Just now";
-
-    }
-
-
-    const minutes=
-        Math.floor(
-            seconds/60
-        );
-
-
-    if(minutes<60){
-
-        return minutes+
-            " mins ago";
-
-    }
-
-
-    const hours=
-        Math.floor(
-            minutes/60
-        );
-
-
-    if(hours<24){
-
-        return hours+
-            " hours ago";
-
-    }
-
-
-    const days=
-        Math.floor(
-            hours/24
-        );
-
-
-    if(days<7){
-
-        return days+
-            " days ago";
-
-    }
-
-
-    return date.toLocaleDateString();
+  document
+    .getElementById(
+      "businessModal"
+    )
+    .classList.add("show");
 
 }
 
 
-function isUUID(value){
+/* =========================================================
+   MODALS
+========================================================= */
 
-    if(!value)return false;
+function closeModal(id){
 
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        .test(String(value));
-
-}
-
-
-function escapeHTML(value){
-
-    return String(value ?? "")
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
-
-}
+  document
+    .getElementById(id)
+    .classList.remove("show");
 
 
-function escapeAttribute(value){
+  if(
+    id === "businessModal"
+  ){
 
-    return escapeHTML(value);
-
-}
-
-
-/* =====================================================
-   DATABASE INITIALIZATION
-===================================================== */
-
-async function initializeApp(){
-
-    const container=
-        document.getElementById(
-            "newsContainer"
-        );
-
-    container.innerHTML=`
-
-        <div class="text-center
-        text-zinc-600 text-xs p-10">
-            Loading latest news...
-        </div>
-
-    `;
+    const stage =
+      document.getElementById(
+        "tvStage"
+      );
 
 
-    await Promise.all([
-
-        loadNews(),
-
-        loadTrending(),
-
-        loadVideos()
-
-    ]);
+    const video =
+      stage.querySelector(
+        "video"
+      );
 
 
-    renderNews();
+    if(video){
 
-    renderVideos();
+      video.pause();
 
-    showNews();
+      video.removeAttribute(
+        "src"
+      );
+
+      video.load();
+
+    }
+
+  }
 
 }
 
 
-/* =====================================================
+function closeModalOutside(e,id){
+
+  if(
+    e.target.id === id
+  ){
+
+    closeModal(id);
+
+  }
+
+}
+
+
+/* =========================================================
+   BUSINESS SHARE
+========================================================= */
+
+function shareBusinessDetails(){
+
+  closeModal(
+    "businessModal"
+  );
+
+
+  document
+    .getElementById(
+      "shareModal"
+    )
+    .classList.add("show");
+
+}
+
+
+/* =========================================================
+   SHARE WHATSAPP
+========================================================= */
+
+function shareWhatsApp(){
+
+  const txt =
+    encodeURIComponent(
+      `Check out ${
+        value(
+          currentShareData,
+          "name",
+          "title",
+          "business_name"
+        )
+      } on MILLIONPIXEL!`
+    );
+
+
+  window.open(
+    `https://api.whatsapp.com/send?text=${txt}`,
+    "_blank"
+  );
+
+}
+
+
+/* =========================================================
+   SHARE TELEGRAM
+========================================================= */
+
+function shareTelegram(){
+
+  const txt =
+    encodeURIComponent(
+      `Check out ${
+        value(
+          currentShareData,
+          "name",
+          "title",
+          "business_name"
+        )
+      } on MILLIONPIXEL!`
+    );
+
+
+  window.open(
+    `https://t.me/share/url?url=${
+      encodeURIComponent(
+        location.href
+      )
+    }&text=${txt}`,
+    "_blank"
+  );
+
+}
+
+
+/* =========================================================
+   COPY
+========================================================= */
+
+function copyShareLink(){
+
+  if(
+    navigator.clipboard &&
+    navigator.clipboard.writeText
+  ){
+
+    navigator.clipboard.writeText(
+      location.href
+    );
+
+  }
+
+  showToast(
+    "Link copied to clipboard!"
+  );
+
+  closeModal(
+    "shareModal"
+  );
+
+}
+
+
+/* =========================================================
+   NATIVE SHARE
+========================================================= */
+
+function nativeShare(){
+
+  if(
+    navigator.share
+  ){
+
+    navigator.share({
+
+      title:
+        "MILLIONPIXEL",
+
+      text:
+        value(
+          currentShareData,
+          "name",
+          "title",
+          "business_name"
+        ),
+
+      url:
+        location.href
+
+    }).catch(
+      () => {}
+    );
+
+  }else{
+
+    copyShareLink();
+
+  }
+
+}
+
+
+/* =========================================================
    START APP
-===================================================== */
+========================================================= */
 
 window.addEventListener(
-    "load",
-    initializeApp
+  "DOMContentLoaded",
+  () => {
+
+    loadTheme();
+
+    loadNews();
+
+  }
 );
 
 </script>
-
-</div>
 
 </body>
 </html>
